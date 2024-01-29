@@ -36,6 +36,7 @@
 									<listOptionValue builtIn="false" value="../."/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32F4xx_StdPeriph_Driver/inc"/>
+									<listOptionValue builtIn="false" value="../hardware"/>
 								</option>
 								<inputType id="com.atollic.truestudio.as.input.276012899" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
@@ -49,6 +50,7 @@
 									<listOptionValue builtIn="false" value="../src"/>
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32F4xx_StdPeriph_Driver/inc"/>
+									<listOptionValue builtIn="false" value="../hardware"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.endianess.430891010" name="Endianess" superClass="com.atollic.truestudio.common_options.target.endianess"/>
 								<option id="com.atollic.truestudio.common_options.target.mcpu.2131891837" name="Microcontroller" superClass="com.atollic.truestudio.common_options.target.mcpu" value="STM32F411RE" valueType="enumerated"/>
@@ -105,8 +107,27 @@
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.secoutput.39094668" name="Other" superClass="com.atollic.truestudio.exe.debug.toolchain.secoutput"/>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="com.atollic.truestudio.exe.debug.584812212.287681430" name="/" resourcePath="hardware">
+						<toolChain id="com.atollic.truestudio.exe.debug.toolchain.165557612" name="Atollic ARM Tools" superClass="com.atollic.truestudio.exe.debug.toolchain" unusedChildren="">
+							<option id="com.atollic.truestudio.general.runtimelib.1322489369.2119531277" name="Runtime Library" superClass="com.atollic.truestudio.general.runtimelib.1322489369"/>
+							<option id="com.atollic.truestudio.toolchain_options.mcu.1364831607.1925086988" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu.1364831607"/>
+							<option id="com.atollic.truestudio.toolchain_options.vendor.1889714808.975853998" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor.1889714808"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.as.2054687158" name="Assembler" superClass="com.atollic.truestudio.exe.debug.toolchain.as.1632211129">
+								<inputType id="com.atollic.truestudio.as.input.178762732" name="Input" superClass="com.atollic.truestudio.as.input"/>
+							</tool>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.gcc.1354254074" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc.523821796">
+								<inputType id="com.atollic.truestudio.gcc.input.602679498" superClass="com.atollic.truestudio.gcc.input"/>
+							</tool>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.ld.971708885" name="C Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ld.1299467082"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.gpp.177775144" name="C++ Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gpp.1990452658"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.ldcc.1473399637" name="C++ Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ldcc.619790247"/>
+							<tool id="com.atollic.truestudio.ar.base.632856823" name="Archiver" superClass="com.atollic.truestudio.ar.base.533870820"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.secoutput.204441490" name="Other" superClass="com.atollic.truestudio.exe.debug.toolchain.secoutput.39094668"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hardware"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
@@ -148,8 +169,8 @@
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_StdPeriph_Driver/inc"/>
-									<listOptionValue builtIn="false" value="../."/>
 									<listOptionValue builtIn="false" value=".././"/>
+									<listOptionValue builtIn="false" value="../hardware"/>
 								</option>
 								<inputType id="com.atollic.truestudio.as.input.1203179825" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
@@ -164,8 +185,8 @@
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32F4xx/Include"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_HAL_Driver/Inc"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_StdPeriph_Driver/inc"/>
-									<listOptionValue builtIn="false" value="../."/>
 									<listOptionValue builtIn="false" value=".././"/>
+									<listOptionValue builtIn="false" value="../hardware"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.endianess.1762156813" name="Endianess" superClass="com.atollic.truestudio.common_options.target.endianess"/>
 								<option id="com.atollic.truestudio.common_options.target.mcpu.864776136" name="Microcontroller" superClass="com.atollic.truestudio.common_options.target.mcpu" value="STM32F411RE" valueType="enumerated"/>
@@ -235,7 +256,14 @@
 		<project id="blink_f411.com.atollic.truestudio.exe.230159051" name="Executable" projectType="com.atollic.truestudio.exe"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/blink_f411"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/blink_f411"/>
+		</configuration>
+	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>

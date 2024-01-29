@@ -28,8 +28,10 @@ SOFTWARE.
 */
 
 /* Includes */
-#include "main.h"
+#include <stddef.h>
+#include <stdint.h>
 
+#include "main.h"
 
 
 ///////////////////////////////////////////
@@ -49,21 +51,23 @@ int main(void)
     gpio_init();
     gpio_button_init();
 
-
-
-
-    int i = 0;
+    usart2_init();
+    spi1_init();
 
 
     /* Infinite loop */
     while (1)
     {
-        GPIO_ResetBits(GPIOA, GPIO_Pin_5);
-        Delay(1000);
-        GPIO_SetBits(GPIOA, GPIO_Pin_5);
-        Delay(1000);
+        //read the buttonFlag
+        if (buttonFlag == 1)
+        {
+            usart2_txString("Hello from program\r\n");
 
-        i++;
+            buttonFlag = 0;
+        }
+
+//        GPIO_ToggleBits(GPIOA, GPIO_Pin_5);
+        Delay(500);
     }
 }
 
@@ -85,81 +89,5 @@ void TimingDelay_Decrement(void)
         TimingDelay--;
 }
 
-
-
-///////////////////////////////////////////
-//Function prototypes
-//configure the led on PA5
-void gpio_init(void)
-{
-    //init structs
-    GPIO_InitTypeDef  GPIO_InitStructure;
-
-    //Enable PortA clocks
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);		//PA5 - green led
-
-    //PA5
-    //LEDs
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_5;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;            //configure for output
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
-    GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-    GPIO_ResetBits(GPIOA, GPIO_Pin_5);
-
-}
-
-
-
-///////////////////////////////////////
-//Configure the user button on PC13
-//with interrupts.  guessing it's EXTI Line13
-//falling edge trigger
-void gpio_button_init(void)
-{
-    //init structs
-    GPIO_InitTypeDef GPIO_InitStructure;
-    EXTI_InitTypeDef EXTI_InitStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
-
-    //Enable Port C clocks - AHB1 Bus
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);       //PC13 - user button
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);      //clock enable for line interrupts
-
-    //User button - pc13
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;            //input
-    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;          //normally up
-    GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-    //interrupts - pc13 with line interrupts
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource13);
-
-    EXTI_InitStructure.EXTI_Line = EXTI_Line13;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
-    EXTI_Init(&EXTI_InitStructure);
-
-    //lines 10-15 share same irq
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI15_10_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
-
-////////////////////////////////////////
-//button interrupt handler for the
-//user button on PC13
-void gpio_button_handler(void)
-{
-    GPIO_ToggleBits(GPIOA, GPIO_Pin_5);
-}
 
 

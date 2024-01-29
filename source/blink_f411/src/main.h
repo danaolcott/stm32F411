@@ -12,15 +12,16 @@
 #include "stm32f4xx_conf.h"
 #include "stm32f4xx_it.h"
 
+#include "hardware.h"
+#include "gpio.h"
+#include "usart.h"
+#include "spi.h"
 
 extern volatile uint32_t TimingDelay;
 void Delay(volatile uint32_t timeTick);
 void TimingDelay_Decrement(void);
 
 
-void gpio_init(void);
-void gpio_button_init(void);
 
-void gpio_button_handler(void);
 
 #endif /* MAIN_H_ */

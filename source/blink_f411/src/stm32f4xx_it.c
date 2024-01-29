@@ -28,8 +28,12 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include <usart.h>
 #include "stm32f4xx_it.h"
 #include "main.h"
+
+#include "gpio.h"
+#include "usart.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -158,14 +162,18 @@ void SysTick_Handler(void)
 //
 void EXTI15_10_IRQHandler(void)
 {
-    if (EXTI_GetITStatus(EXTI_Line13) != RESET)
-    {
-        gpio_button_handler();
-
-        EXTI_ClearITPendingBit(EXTI_Line13);
-    }
-
+    gpio_button_handler();
 }
+
+
+/////////////////////////////////////////
+//uart2 interrupt handler - maybe put this
+//function def in uart.c??
+void USART2_IRQHandler(void)
+{
+    usart2_interrupt_handler();
+}
+
 
 /**
   * @brief  This function handles PPP interrupt request.
