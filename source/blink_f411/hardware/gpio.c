@@ -13,30 +13,48 @@
 volatile uint8_t buttonFlag;
 
 ///////////////////////////////////////////
-//Function prototypes
-//configure the led on PA5
-//note:  PA5 will eventually change to one of the
-//spi pins for the lcd.
+//Initialize all the pins for leds, control lines
+//for the display.... others?
+//PA13 - this is shared with led on the board
+//and the spi1 sck pin, so no need to initialize.
+//Control lines for the LCD
+////lcd controls
+//#define LCD_CMD_Pin GPIO_Pin_7
+//#define LCD_CMD_GPIO_Port GPIOC
+
+//#define LCD_Backlight_Pin GPIO_Pin_8
+//#define LCD_Backlight_GPIO_Port GPIOA
+//#define LCD_Reset_Pin GPIO_Pin_9
+//#define LCD_Reset_GPIO_Port GPIOA
+//
+//PC7, PA8 and PA9
 void gpio_init(void)
 {
-    buttonFlag = 0;
-
     //init structs
-//    GPIO_InitTypeDef  GPIO_InitStructure;
+    GPIO_InitTypeDef  GPIO_InitStructure;
 
-    //Enable PortA clocks
-//    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);       //PA5 - green led
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);   //port A clocks
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);   //port C clocks
 
-    //PA5 - green led
-//    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_5;
-//    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;            //configure for output
-//    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
-//    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
-//    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
-//    GPIO_Init(GPIOA, &GPIO_InitStructure);
+    //PA8 and PA9 - backlight and reset pins
+    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8 | GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;            //configure for output
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-//    GPIO_ResetBits(GPIOA, GPIO_Pin_5);
+    //PC7 - LCS CMD Pin
+    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;            //configure for output
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
 
+    GPIO_ResetBits(GPIOA, GPIO_Pin_8);
+    GPIO_ResetBits(GPIOA, GPIO_Pin_9);
+    GPIO_ResetBits(GPIOC, GPIO_Pin_7);
 }
 
 
@@ -51,6 +69,8 @@ void gpio_init(void)
 
 void gpio_button_init(void)
 {
+    buttonFlag = 0;
+
     //init structs
     GPIO_InitTypeDef GPIO_InitStructure;
     EXTI_InitTypeDef EXTI_InitStructure;

@@ -68,11 +68,11 @@ void spi1_init(void)
     SPI_InitStruct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
     SPI_InitStruct.SPI_Mode = SPI_Mode_Master;
     SPI_InitStruct.SPI_DataSize = SPI_DataSize_8b;      //8 bits
-    SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;            //idle low
-    SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;           //leading
+    SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;            //idle low?  high
+    SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;           //leading?  trailing
     SPI_InitStruct.SPI_NSS = SPI_NSS_Soft | SPI_NSSInternalSoft_Set;    //handle CS pin another way
 
-    SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
+    SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
     SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;
 
     SPI_Init(SPI1, &SPI_InitStruct);

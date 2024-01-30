@@ -16,6 +16,8 @@
 #include "gpio.h"
 #include "usart.h"
 #include "spi.h"
+#include "lcd_12864_dfrobot.h"
+
 
 extern volatile uint32_t TimingDelay;
 void Delay(volatile uint32_t timeTick);

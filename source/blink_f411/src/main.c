@@ -34,6 +34,8 @@ SOFTWARE.
 #include "main.h"
 
 
+
+
 ///////////////////////////////////////////
 //globals
 volatile uint32_t TimingDelay;
@@ -41,6 +43,7 @@ volatile uint32_t TimingDelay;
 
 int main(void)
 {
+
     //Configure the systick with interrupts, HSI = 16Mhz
     if (SysTick_Config(SystemCoreClock / 1000))
     {
@@ -54,10 +57,20 @@ int main(void)
     usart2_init();
     spi1_init();
 
+    LCD_Config();
+    LCD_BacklightOn();
+    LCD_Clear(0x00);
+
+
 
     /* Infinite loop */
     while (1)
     {
+        LCD_Clear(0x00);
+        LCD_DrawStringKern(0, 3, "HELLO");
+        LCD_DrawStringKern(2, 3, "This is a");
+        LCD_DrawStringKern(4, 3, "New Line");
+
         //read the buttonFlag
         if (buttonFlag == 1)
         {
@@ -66,8 +79,10 @@ int main(void)
             buttonFlag = 0;
         }
 
+
 //        GPIO_ToggleBits(GPIOA, GPIO_Pin_5);
         Delay(500);
+
     }
 }
 

@@ -37,6 +37,8 @@
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32F4xx_StdPeriph_Driver/inc"/>
 									<listOptionValue builtIn="false" value="../hardware"/>
+									<listOptionValue builtIn="false" value="../display"/>
+									<listOptionValue builtIn="false" value="../bitmap"/>
 								</option>
 								<inputType id="com.atollic.truestudio.as.input.276012899" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
@@ -51,6 +53,8 @@
 									<listOptionValue builtIn="false" value="../../Drivers/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="../../Drivers/STM32F4xx_StdPeriph_Driver/inc"/>
 									<listOptionValue builtIn="false" value="../hardware"/>
+									<listOptionValue builtIn="false" value="../display"/>
+									<listOptionValue builtIn="false" value="../bitmap"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.endianess.430891010" name="Endianess" superClass="com.atollic.truestudio.common_options.target.endianess"/>
 								<option id="com.atollic.truestudio.common_options.target.mcpu.2131891837" name="Microcontroller" superClass="com.atollic.truestudio.common_options.target.mcpu" value="STM32F411RE" valueType="enumerated"/>
@@ -112,6 +116,7 @@
 							<option id="com.atollic.truestudio.general.runtimelib.1322489369.2119531277" name="Runtime Library" superClass="com.atollic.truestudio.general.runtimelib.1322489369"/>
 							<option id="com.atollic.truestudio.toolchain_options.mcu.1364831607.1925086988" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu.1364831607"/>
 							<option id="com.atollic.truestudio.toolchain_options.vendor.1889714808.975853998" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor.1889714808"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.atollic.truestudio.exe.debug.toolchain.platform" isAbstract="false" name="Debug platform" osList="all" superClass="com.atollic.truestudio.exe.debug.toolchain.platform"/>
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.as.2054687158" name="Assembler" superClass="com.atollic.truestudio.exe.debug.toolchain.as.1632211129">
 								<inputType id="com.atollic.truestudio.as.input.178762732" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
@@ -127,6 +132,8 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="bitmap"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="display"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hardware"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
@@ -171,6 +178,8 @@
 									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_StdPeriph_Driver/inc"/>
 									<listOptionValue builtIn="false" value=".././"/>
 									<listOptionValue builtIn="false" value="../hardware"/>
+									<listOptionValue builtIn="false" value="../display"/>
+									<listOptionValue builtIn="false" value="../bitmap"/>
 								</option>
 								<inputType id="com.atollic.truestudio.as.input.1203179825" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
@@ -187,6 +196,8 @@
 									<listOptionValue builtIn="false" value="../Drivers/STM32F4xx_StdPeriph_Driver/inc"/>
 									<listOptionValue builtIn="false" value=".././"/>
 									<listOptionValue builtIn="false" value="../hardware"/>
+									<listOptionValue builtIn="false" value="../display"/>
+									<listOptionValue builtIn="false" value="../bitmap"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.endianess.1762156813" name="Endianess" superClass="com.atollic.truestudio.common_options.target.endianess"/>
 								<option id="com.atollic.truestudio.common_options.target.mcpu.864776136" name="Microcontroller" superClass="com.atollic.truestudio.common_options.target.mcpu" value="STM32F411RE" valueType="enumerated"/>
@@ -245,6 +256,8 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="bitmap"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="display"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
