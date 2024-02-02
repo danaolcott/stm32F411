@@ -68,8 +68,13 @@ int main(void)
     {
         LCD_Clear(0x00);
         LCD_DrawStringKern(0, 3, "HELLO");
-        LCD_DrawStringKern(2, 3, "This is a");
-        LCD_DrawStringKern(4, 3, "New Line");
+        LCD_DrawStringKern(1, 3, "This is a");
+        LCD_DrawStringKern(2, 3, "New Line");
+        LCD_DrawStringKern(3, 3, "HELLO");
+        LCD_DrawStringKern(4, 3, "This is a");
+        LCD_DrawStringKern(5, 3, "New Line");
+        LCD_DrawStringKern(6, 3, "New Line");
+        LCD_DrawStringKern(7, 3, "New Line");
 
         //read the buttonFlag
         if (buttonFlag == 1)
@@ -79,9 +84,9 @@ int main(void)
             buttonFlag = 0;
         }
 
-
-//        GPIO_ToggleBits(GPIOA, GPIO_Pin_5);
         Delay(500);
+//        GPIO_ToggleBits(GPIOA, GPIO_Pin_5);
+
 
     }
 }

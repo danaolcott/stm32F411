@@ -12,6 +12,12 @@
 #define SPI1_MOSI_Pin GPIO_Pin_7
 #define SPI1_GPIO_Port GPIOA
 
+NOTE:  Going forward, use PB10 as the CS Pin
+for the LCD.  PB6 will be used as the cs pin for
+the SD Card
+
+
+
  *
  */
 
@@ -43,12 +49,15 @@ void spi1_init(void)
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
 
-    //cs pin as output - PB6
-    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6;
+    //cs pin as output - PB6 - SD Card CS pin
+    //This is mapped to D10 on the arduino labels
+    //cs pin as output - PB10 - CS Pin for the LCD
+    //this is mapped to D6 on the arduino labels
+    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_6 | GPIO_Pin_10;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;            //configure for output
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
-    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;        //should be pulled up
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
     //PA5, PA6, PA7 as alternate function - SPI1
@@ -80,19 +89,28 @@ void spi1_init(void)
 
     //set the cs pin high
     GPIO_SetBits(GPIOB, GPIO_Pin_6);
-
+    GPIO_SetBits(GPIOB, GPIO_Pin_10);
 }
 
-void spi1_select(void)
+void spi1_lcd_select(void)
+{
+    GPIO_ResetBits(GPIOB, GPIO_Pin_10);
+}
+
+void spi1_lcd_deselect(void)
+{
+    GPIO_SetBits(GPIOB, GPIO_Pin_10);
+}
+
+void spi1_sdcard_select(void)
 {
     GPIO_ResetBits(GPIOB, GPIO_Pin_6);
 }
 
-void spi1_deselect(void)
+void spi1_sdcard_deselect(void)
 {
     GPIO_SetBits(GPIOB, GPIO_Pin_6);
 }
-
 
 uint8_t spi1_txByte(uint8_t data)
 {
@@ -106,18 +124,18 @@ uint8_t spi1_txByte(uint8_t data)
     return SPI1->DR;
 }
 
-void spi1_txData(uint8_t* data, uint8_t length)
+void spi1_lcd_txData(uint8_t* data, uint8_t length)
 {
     uint8_t i = 0;
 
-    spi1_select();
+    spi1_lcd_select();
 
     for (i = 0 ; i < length ; i++)
     {
         spi1_txByte(data[i]);
     }
 
-    spi1_deselect();
+    spi1_lcd_deselect();
 }
 
 

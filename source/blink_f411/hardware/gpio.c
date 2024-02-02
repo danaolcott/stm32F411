@@ -28,6 +28,11 @@ volatile uint8_t buttonFlag;
 //#define LCD_Reset_GPIO_Port GPIOA
 //
 //PC7, PA8 and PA9
+
+//Configure alternate pin for cs for LCD - PB10
+//this maps to D6 on arduino pinout.  To use the
+//display going forwared, use PB10, and cut the pin
+//on D10 (PB6) since this will be shared with the sdcard
 void gpio_init(void)
 {
     //init structs

@@ -46,7 +46,16 @@
 #define LCD_Reset_GPIO_Port GPIOA
 
 //spi interface for lcd
-#define SPI1_CS_Pin GPIO_Pin_6
+#define SPI1_CS_LCD_Pin GPIO_Pin_10
+#define SPI1_CS_GPIO_Port GPIOB
+
+#define SPI1_SCK_Pin GPIO_Pin_5
+#define SPI1_MISO_Pin GPIO_Pin_6
+#define SPI1_MOSI_Pin GPIO_Pin_7
+#define SPI1_GPIO_Port GPIOA
+
+//spi interface for sdcard
+#define SPI1_CS_SDCARD_Pin GPIO_Pin_6
 #define SPI1_CS_GPIO_Port GPIOB
 
 #define SPI1_SCK_Pin GPIO_Pin_5

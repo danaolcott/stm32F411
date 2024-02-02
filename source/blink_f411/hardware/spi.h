@@ -15,11 +15,15 @@
 
 
 void spi1_init(void);
-void spi1_select(void);
-void spi1_deselect(void);
+
+void spi1_lcd_select(void);
+void spi1_lcd_deselect(void);
+void spi1_sdcard_select(void);
+void spi1_sdcard_deselect(void);
+
 
 uint8_t spi1_txByte(uint8_t data);
-void spi1_txData(uint8_t* data, uint8_t length);
+void spi1_lcd_txData(uint8_t* data, uint8_t length);
 
 
 
