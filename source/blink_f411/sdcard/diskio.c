@@ -88,7 +88,7 @@ DSTATUS disk_initialize (
 		}
 	}
 	CardType = ty;	/* Card type */
-	deselect();
+	sd_deselect();
 
 	if (ty) {			/* OK */
 		FCLK_FAST();			/* Set fast clock */
@@ -148,7 +148,7 @@ DRESULT disk_read (
 			send_cmd(CMD12, 0);				/* STOP_TRANSMISSION */
 		}
 	}
-	deselect();
+	sd_deselect();
 
 	return count ? RES_ERROR : RES_OK;	/* Return result */
 }
@@ -189,7 +189,7 @@ DRESULT disk_write (
 			if (!xmit_datablock(0, 0xFD)) count = 1;	/* STOP_TRAN token */
 		}
 	}
-	deselect();
+	sd_deselect();
 
 	return count ? RES_ERROR : RES_OK;	/* Return result */
 }
@@ -219,7 +219,7 @@ DRESULT disk_ioctl (
 
 	switch (cmd) {
 	case CTRL_SYNC :		/* Wait for end of internal write process of the drive */
-		if (select()) res = RES_OK;
+		if (sd_select()) res = RES_OK;
 		break;
 
 	case GET_SECTOR_COUNT :	/* Get drive capacity in unit of sector (DWORD) */
@@ -275,7 +275,7 @@ DRESULT disk_ioctl (
 		res = RES_PARERR;
 	}
 
-	deselect();
+	sd_deselect();
 
 	return res;
 }

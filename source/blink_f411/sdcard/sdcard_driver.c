@@ -1,8 +1,16 @@
 ////////////////////////////////////////////
 //SD Card Driver File
+//Tiva Launchpad with homemade shield:
 //SD card is driven via spi3 on PD0 - PD3,
-//
 //Chip select is PA5.
+//
+//STM32F411 Nucleo stacked with dfrobot lcd:
+//spi1 using D10-D13 pins (arduino labels)
+//and with the cs pin on D10 (PB6 labeled on nucleo board)
+//
+//Note: The spi is shared with the lcd, so might have
+//to add a semephore or something to prevent it from
+//getting accessed while in use.
 //
 //Peripherals assumed to be configured via the
 //SPI driver and GPIO driver files.
@@ -11,11 +19,16 @@
 //contained in this driver file, as well as members 
 //for FATFS, FIL, etc....
 //
+#include <string.h>
+#include <stdint.h>
+#include <stddef.h>
+
 //#include "main.h"
 #include "sdcard_driver.h"
-#include "gpio_driver.h"        
-#include "uart_driver.h"        //for printing to serial port
-#include "timer_driver.h"       //for timeouts
+#include "gpio.h"
+#include "usart.h"        //for printing to serial port
+#include "spi.h"
+//#include "timer.h"       //for timeouts
 #include "diskio.h"             //defines - CMD0
 #include "ff.h"
 
@@ -39,6 +52,14 @@ FATFS fs32;     //mount this one
 #endif
 
 
+
+void SD_DummyDelay(uint16_t delay)
+{
+    volatile uint16_t time = delay;
+    while (time > 0)
+        time--;
+
+}
 
 
 /////////////////////////////////////////
@@ -224,12 +245,10 @@ int SD_BuildDirectory(char* name)
 //
 void SD_ErrorHandler(FRESULT result)
 {
-        LED_SetRed();
-        LED_ClearBlue();
-        LED_ClearGreen();
-
+//    TODO: add an led that i can use for debugging
         //print the string to the uart
-        uart_print(PORT_UART_0, SD_GetStringFromFatCode(result));
+    usart2_txString(SD_GetStringFromFatCode(result));
+
 }
 
 
@@ -272,24 +291,18 @@ char* SD_GetStringFromFatCode(FRESULT result)
 
 
 
-
-
-
-
-
-
 ///////////////////////////////////////////
-//CS LOW - PA5
+//CS LOW - sd card cs pin - PB6
 void SD_CS_Assert()
 {
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5, 0x00);
+    spi1_sdcard_select();
 }
 
 ///////////////////////////////////////////
-//CS HIGH - PA5
+//CS HIGH - sd card cs pin - pb6
 void SD_CS_Deassart()
 {
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5, GPIO_PIN_5);
+    spi1_sdcard_deselect();
 }
 
 ///////////////////////////////////////////
@@ -297,21 +310,17 @@ void SD_CS_Deassart()
 //the rx fifo to clear it
 void SPI_transmit(uint8_t data)
 {
-    uint32_t dummy;
-    SSIDataPut(SSI3_BASE, data);    //send the byte
-    while(SSIBusy(SSI3_BASE));      //wait
-    SSIDataGet(SSI3_BASE, &dummy);  //clear fifo
+    spi1_txByte(data);
 }
 
 
 uint8_t SPI_receive()
 {
-    uint32_t result;
-    SSIDataPut(SSI3_BASE, 0xFF);        //send dummy to generate clock
-    while(SSIBusy(SSI3_BASE));          //wait
-    SSIDataGet(SSI3_BASE, &result);     //read the result
+    uint8_t result;
 
-    return ((uint8_t)(result & 0xFF));
+    result = spi1_rxByte();
+
+    return result;
 }
 
 
@@ -332,8 +341,12 @@ unsigned char SD_GoIdleState()
     int n;
 
     //set the spi speed to 100khz
-    SPI_SetSpeedHz(100000);
-    SysCtlDelay(100);           //wait a bit
+    spi1_setSpeedHz(SPI_SPEED_400KHZ);
+
+    //TODO:  not sure what this is....SysCtlDelay(100)
+
+    SD_DummyDelay(10000);
+//    SysCtlDelay(100);           //wait a bit
 
     unsigned char i, response, retry=0;
 
@@ -353,8 +366,9 @@ unsigned char SD_GoIdleState()
         response = SD_sendCommand(CMD0, 0);
 
         //print the response
-        n = sprintf(buf, "Attempt: %d,  CMD: %d   Response: %d\r\n", retry, CMD0, response);
-        uart_printArray(PORT_UART_0, buf, n);
+        n = sprintf((char*)buf, "Attempt: %d,  CMD: %d   Response: %d\r\n", retry, CMD0, response);
+
+        usart2_txData(buf, n);
 
         retry++;
 
@@ -362,7 +376,7 @@ unsigned char SD_GoIdleState()
         {
             //error, could not init the card, 
             //write something to the uart...
-            uart_print(PORT_UART_0, "SD_Init: CMD0 - Failure to Receive 0x01\r\n");            
+            usart2_txString("SD_Init: CMD0 - Failure to Receive 0x01\r\n");
             return 0;
 
         }//time out
@@ -403,21 +417,22 @@ unsigned char SD_sendCommand(unsigned char cmd, unsigned long arg)
     while((response = SPI_receive()) == 0xff)
     {
         //print the command and response
-        int n = sprintf(buf, "CMD: 0x%x   RES: 0x%x\r\n", cmd, response);
-        uart_printArray(PORT_UART_0, buf, n);
+        int n = sprintf((char*)buf, "CMD: 0x%x   RES: 0x%x\r\n", cmd, response);
+
+        usart2_txData(buf, n);
 
         //wait response
         if(retry++ > 0xfe)
         {
             //error - command failed 
-            uart_print(PORT_UART_0, "Command Failed - Continued RX 0xFF after 0xFE retries\r\n");
+            usart2_txString("Command Failed - Continued RX 0xFF after 0xFE retries\r\n");
             break; //time out error
         }
     }
 
     //print the last response
-    int n = sprintf(buf, "CMD: 0x%x   RES: 0x%x\r\n", cmd, response);
-    uart_printArray(PORT_UART_0, buf, n);
+    int n = sprintf((char*)buf, "CMD: 0x%x   RES: 0x%x\r\n", cmd, response);
+    usart2_txData(buf, n);
 
     
     SPI_receive(); //extra 8 CLK
@@ -434,35 +449,33 @@ unsigned char SD_sendCommand(unsigned char cmd, unsigned long arg)
 }
 
 
-
-
-
-
 //////////////////////////////////////////////
 //function defintions
 void CS_HIGH()
 {
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5, GPIO_PIN_5);
+    spi1_sdcard_deselect();
 }
 
 void CS_LOW()
 {
-    GPIOPinWrite(GPIO_PORTA_BASE, GPIO_PIN_5, 0x00);
+    spi1_sdcard_select();
 }
 
-void deselect()
+void sd_deselect()
 {
 	CS_HIGH();		/* Set CS# high */
 	xchg_spi(0xFF);	/* Dummy clock (force DO hi-z for multiple slave SPI) */
 }
 
-int select()
+
+//TODO:  need a wait_ready() function
+int sd_select()
 {
 	CS_LOW();		/* Set CS# low */
 	xchg_spi(0xFF);	/* Dummy clock (force DO enabled) */
 	if (wait_ready(500)) return 1;	/* Wait for card ready */
 
-	deselect();
+	sd_deselect();
 	return 0;	/* Timeout */
 
 }
@@ -521,18 +534,19 @@ void init_spi()
     //do nothing, it's already initialized
 }
 
+//TODO:  configure the spi so it can run fast and slow
 //////////////////////////
 //400khz clock
 void FCLK_SLOW()
 {
-    SPI_SetSpeedHz(100000);
+    spi1_setSpeedHz(SPI_SPEED_400KHZ);
 }
 
 //////////////////////////
 //12mhz clock speed
 void FCLK_FAST()
 {
-    SPI_SetSpeedHz(12000000);
+    spi1_setSpeedHz(SPI_SPEED_1MHZ);
 }
 
 /////////////////////////////////
@@ -540,11 +554,10 @@ void FCLK_FAST()
 //
 uint8_t xchg_spi(uint8_t data)
 {
-    uint32_t result;
-    SSIDataPut(SSI3_BASE, data);
-    while(SSIBusy(SSI3_BASE));
-    SSIDataGet(SSI3_BASE, &result);
-    return ((uint8_t)(result & 0xFF));
+    uint8_t result;
+
+    result = spi1_txByte(data);
+    return result;
 }
 
 
@@ -561,8 +574,8 @@ uint8_t send_cmd(BYTE cmd, DWORD arg)
 
 	/* Select the card and wait for ready except to stop multiple block read */
 	if (cmd != CMD12) {
-		deselect();
-		if (!select()) return 0xFF;
+		sd_deselect();
+		if (!sd_select()) return 0xFF;
 	}
 
 	/* Send command packet */
@@ -602,15 +615,12 @@ uint8_t send_cmd(BYTE cmd, DWORD arg)
 
 void rcvr_spi_multi (BYTE *buff, UINT btr)
 {
-    uint32_t result;
+    uint8_t result;
 
     for (int i = 0 ; i < btr ; i++)
     {
-        SSIDataPut(SSI3_BASE, 0xFF);        //dummy to generate clock
-        while(SSIBusy(SSI3_BASE));          //wait
-        SSIDataGet(SSI3_BASE, &result);     //read into result
-
-        buff[i] = (uint8_t)(result & 0xFF); //copy to the buffer
+        result = spi1_txByte(0xFF);
+        buff[i] = result; //copy to the buffer
     }
 }
 
@@ -625,15 +635,14 @@ void rcvr_spi_multi (BYTE *buff, UINT btr)
 //
 void xmit_spi_multi (const BYTE *buff, UINT btx)
 {
-    uint32_t result;
+    uint8_t result;
 
     for (int i = 0 ; i < btx ; i++)
     {
-        SSIDataPut(SSI3_BASE, buff[i]);     //send a byte
-        while(SSIBusy(SSI3_BASE));          //wait
-        SSIDataGet(SSI3_BASE, &result);     //read into result - clears the fifo
+        result = spi1_txByte(buff[i]);
     }
 }
+
 #endif
 
 
@@ -837,6 +846,45 @@ int SD_AppendData(char* name, char* data, uint32_t size)
     res = f_close(&fil);
     return -255;   
 }
+
+
+
+////////////////////////////////////////////////////
+//Read the size of a file in bytes.
+//Loads the value of "size" with the file size
+//returns the FR_RESULT as a negative value.
+//returns 0 if ok.  Returns -255 if the error
+//is unknown.
+int SD_GetFileSize(char* name, uint32_t* size)
+{
+    FRESULT res;
+    FIL fil;
+
+    res = f_open(&fil, name, FA_READ);
+
+    if (res == FR_OK)
+    {
+        //read the size of the file and close it
+        *size = f_size(&fil);
+
+        f_close(&fil);
+    }
+
+    else
+    {
+        *size = 0;
+        f_close(&fil);
+        SD_ErrorHandler(res);
+        return (-1*((int)res));
+    }
+
+    return res;
+}
+
+
+
+
+
 
 
 int SD_FileDelete(char *name)

@@ -92,6 +92,52 @@ void spi1_init(void)
     GPIO_SetBits(GPIOB, GPIO_Pin_10);
 }
 
+
+/////////////////////////////////////////////
+//sets the speed of the spi controller
+//this is used to change the speed from slow
+//during initialize the sdcard and after it's
+//initialized can run it faster
+//speed choices are 2mhz, 1mhz, and 400khz.
+//need this function to change the speed of the spi
+//during initialization of the sd card.
+//
+//disables the spi.  makes a new init struct,
+//initializes it with the new struct, and reenables
+//Assumes the system clock is running at 16mhz, which
+//is the default for no pll HSI clock.
+
+void spi1_setSpeedHz(SPI_Speed_t speed)
+{
+    //TODO:  write the spi1_setSpeedHz function
+    SPI_InitTypeDef   SPI_InitStruct;
+
+    SPI_Cmd(SPI1, DISABLE); // disable the SPI1
+
+    //do we need to shut this down
+    //RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE);
+
+    SPI_InitStruct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+    SPI_InitStruct.SPI_Mode = SPI_Mode_Master;
+    SPI_InitStruct.SPI_DataSize = SPI_DataSize_8b;      //8 bits
+    SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;            //idle low?  high
+    SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;           //leading?  trailing
+    SPI_InitStruct.SPI_NSS = SPI_NSS_Soft | SPI_NSSInternalSoft_Set;    //handle CS pin another way
+    SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+    SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;
+
+    switch(speed)
+    {
+        case SPI_SPEED_2MHZ:     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;        break;
+        case SPI_SPEED_1MHZ:     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;       break;
+        case SPI_SPEED_400KHZ:   SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;       break;
+        default:                 SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;       break;
+    }
+
+    SPI_Init(SPI1, &SPI_InitStruct);
+    SPI_Cmd(SPI1, ENABLE); // enable SPI1
+}
+
 void spi1_lcd_select(void)
 {
     GPIO_ResetBits(GPIOB, GPIO_Pin_10);
@@ -123,6 +169,23 @@ uint8_t spi1_txByte(uint8_t data)
     //return the received data if any
     return SPI1->DR;
 }
+
+/////////////////////////////////////////
+//spi receive byte - no chip select
+//sends a dummy byte 0xFF and reads the
+//data register, and returns the value
+uint8_t spi1_rxByte(void)
+{
+    SPI1->DR = 0xFF;
+    while(SPI1->SR & SPI_I2S_FLAG_BSY){}    // wait until SPI is not busy anymore
+    while(!(SPI1->SR & SPI_I2S_FLAG_TXE));  // wait until transmit complete - required
+    while(!(SPI1->SR & SPI_I2S_FLAG_RXNE)); // wait until receive complete - required
+    while(SPI1->SR & SPI_I2S_FLAG_BSY){}    // wait until SPI is not busy anymore
+
+    //return the received data if any
+    return SPI1->DR;
+}
+
 
 void spi1_lcd_txData(uint8_t* data, uint8_t length)
 {

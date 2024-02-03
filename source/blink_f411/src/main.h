@@ -17,7 +17,7 @@
 #include "usart.h"
 #include "spi.h"
 #include "lcd_12864_dfrobot.h"
-
+#include "sdcard_driver.h"
 
 extern volatile uint32_t TimingDelay;
 void Delay(volatile uint32_t timeTick);

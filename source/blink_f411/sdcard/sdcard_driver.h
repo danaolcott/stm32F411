@@ -7,7 +7,7 @@
 #ifndef SDCARD_DRIVER__H
 #define SDCARD_DRIVER__H
 
-//#include "main.h"
+#include "main.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -30,6 +30,7 @@ extern uint8_t SD_writeBuffer[SD_WRITE_BUFFER_SIZE];
 ////////////////////////////////////////
 //Function prototypes
 //
+void SD_DummyDelay(uint16_t delay);
 
 int SD_Init(void);
 int SD_BuildDirectory(char* name);
@@ -48,8 +49,8 @@ unsigned char SD_sendCommand(unsigned char cmd, unsigned long arg);
 //functions and commands from fat fs example
 void CS_HIGH(void);		/* Set CS# high */
 void CS_LOW(void);		/* Set CS# low */
-void deselect(void);
-int select(void);
+void sd_deselect(void);
+int sd_select(void);
 
 int wait_ready(uint32_t wt);
 void disk_timerproc (void);
@@ -76,7 +77,7 @@ char *dec32(unsigned long i);
 //file write, read, append, create, delete, etc
 int SD_PrintFileToBuffer(char* name, uint8_t* dest, uint32_t maxbytes);
 int SD_AppendData(char* name, char* data, uint32_t size);
-
+int SD_GetFileSize(char* name, uint32_t* size);
 int SD_FileDelete(char *name);
 int SD_FileCreate(char *name);
 

@@ -30,6 +30,7 @@ SOFTWARE.
 /* Includes */
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "main.h"
 
@@ -40,6 +41,8 @@ SOFTWARE.
 //globals
 volatile uint32_t TimingDelay;
 
+char buffer[32] = {0x00};
+int size = 0;
 
 int main(void)
 {
@@ -61,20 +64,83 @@ int main(void)
     LCD_BacklightOn();
     LCD_Clear(0x00);
 
+    //returns the status of the sdcard
+    //value > 0 - Size of the directory file after it's built
+    //value < 0 - negative value of the FR_RESULT code
 
+    LCD_DrawStringKern(0, 3, "Init SDCard...");
+    int result = SD_Init();
+
+    if (result > 0)
+    {
+        size = snprintf(buffer, 32, "SD Res: %d", result);
+        LCD_DrawStringKernLength(1, 3, (uint8_t*)buffer, size);
+        size = snprintf(buffer, 32, "Dir Size: %d", result);
+        LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
+    }
+    else
+    {
+        //invalid / problem with initializing the sdcard
+        LCD_DrawStringKern(1, 3, "SDCard Error...");
+        size = snprintf(buffer, 32, "SD Res: %d", (-1)*result);
+        LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
+    }
+
+    LCD_DrawStringKern(4, 3, "Press Btn ...");
+
+    while (!buttonFlag)
+    {
+
+    }
+
+    buttonFlag = 0;
+
+    //make a file
+//    SD_FileCreate("counter.txt");
+    char* msg = "This is the header in the counter file\r\n";
+    SD_AppendData("counter.txt", msg, strlen(msg));
+
+    volatile int counter = 0;
 
     /* Infinite loop */
     while (1)
     {
         LCD_Clear(0x00);
-        LCD_DrawStringKern(0, 3, "HELLO");
-        LCD_DrawStringKern(1, 3, "This is a");
-        LCD_DrawStringKern(2, 3, "New Line");
-        LCD_DrawStringKern(3, 3, "HELLO");
-        LCD_DrawStringKern(4, 3, "This is a");
-        LCD_DrawStringKern(5, 3, "New Line");
-        LCD_DrawStringKern(6, 3, "New Line");
-        LCD_DrawStringKern(7, 3, "New Line");
+        LCD_DrawStringKern(0, 3, "HELLO LCD");
+
+        LCD_DrawStringKern(2, 3, "Counter:");
+
+        size = snprintf(buffer, 32, "Cnt: %d", counter);
+        LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
+
+        //write the data to the sdcard, returns the number of
+        //bytes written if ok, returns a negative result if an
+        //error occured.
+        size = snprintf(buffer, 32, "Cnt: %d\r\n", counter);
+        int fres = SD_AppendData("counter.txt", buffer, size);
+
+        if (fres > 0)
+        {
+            size = snprintf(buffer, 32, "Bytes: %d", fres);
+            LCD_DrawStringKernLength(5, 3, (uint8_t*)buffer, size);
+
+            //open it again, get the file size and output to the lcd
+            uint32_t temp = 0;
+            fres = SD_GetFileSize("counter.txt", &temp);
+
+            LCD_DrawStringKern(6, 3, "Total Size:");
+            size = snprintf(buffer, 32, "%d", temp);
+            LCD_DrawStringKernLength(7, 3, (uint8_t*)buffer, size);
+
+        }
+        else        //error
+        {
+            size = snprintf(buffer, 32, "Error: %d", (-1)*fres);
+            LCD_DrawStringKernLength(5, 3, (uint8_t*)buffer, size);
+        }
+
+
+        counter++;
 
         //read the buttonFlag
         if (buttonFlag == 1)
@@ -84,7 +150,7 @@ int main(void)
             buttonFlag = 0;
         }
 
-        Delay(500);
+        Delay(1000);
 //        GPIO_ToggleBits(GPIOA, GPIO_Pin_5);
 
 
