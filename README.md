@@ -13,8 +13,12 @@ Modifications to the SD Card Shield:
 - Remove R1-R6 and make solder bridges across R1, R2, R4.  These are no longer needed since digital output signals from the Nucleo board are 3.3v.
 - Install jumper wire from 3.3v output of the regulator to the 3.3v pin output on the top of the shield.  Note:  The 3.3v output pin on the top of the shield does not carry through for other shields to be stacked on top.  Without the 3.3v signal, the LCD will not work.
 
+Other Hardware Added:
+- This board was also used in the Games repo with added hardware for sound and i2c EEPROM data storage for high score, number of times the game played, etc.  The DAC was made using 5 resistors connected to PB1, PB2, PB13-PB15.  The EEPROM chip was connected to PB8 and PB9.
+
+- 
 STM32 Standard Libraries:
-The projects in this repo all use the Standard Libraries from STM.  I realize these might be considered outdated since STM has the HAL libs, the STM Cube Tool for generated code, etc.  I decided to use the Standard Libraries after trying to get an SDCard to work using the HAL libs in SPI mode.  After many hours of failure, a simple check with the scope monitoring the CS and SCK lines revealed the massive amount of time wasted between the time the CS line went low and the start of the first clock cycle.  I'm not exactly sure this was the source of it not working, but after switching to a more stripped down approach (Standard Libs), I was able to get the sdcard to work.
+- The projects in this repo all use the Standard Libraries from STM.  I realize these might be considered outdated since STM has the HAL libs, the STM Cube Tool for generated code, etc.  I decided to use the Standard Libraries after trying to get an SDCard to work using the HAL libs in SPI mode.  After many hours of failure, a simple check with the scope monitoring the CS and SCK lines revealed the massive amount of time wasted between the time the CS line went low and the start of the first clock cycle.  I'm not exactly sure this was the source of it not working, but after switching to a more stripped down approach (Standard Libs), I was able to get the sdcard to work.
 
 Projects:
 These are all a work in progress, often a collection of items from other projects with no particular direction in mind.
