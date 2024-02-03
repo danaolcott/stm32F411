@@ -5,7 +5,7 @@ It started out as a simple blinking LED project and turned into something more c
 
 Modifications to the LCD shield:
 - cut the header pin that connects to the reset signal.  Solder jumper wire from the cut header pin (shield button) to D2 (PA10).  This allows the button on the shield to be used as user button rather than a reset button.
-- make a solder bridge between pins A1 and A2 (see top of the lcd shield).  Cut the header pin on A1 to prevent the signal from passing into the nucleo board.  The joystick should be configured to use A2 (#### on nucleo) as analog input.  This frees up Pins PB8 and PB9 for using I2C.  Note:  I was using I2C to control an EEPROM memory chip in a different project (see Games repo).
+- make a solder bridge between pins A0 and A1 (see top of the lcd shield).  Cut the header pin on A0 to prevent the signal from passing into the nucleo board.  The joystick should be configured to use A1 (PA1 on nucleo) as analog input.  Note:  This modification is not needed.  I did this when using the shield on the Atmel SAM70 development board and there was a pin conflict.
 - solder jumper wire from the SPI cs pin (D10 - arduino, PB6 - stm32 label) to D6 (PB10) and cut the pin on the header at D10.  Configure the CS pin to work on D6 (PB10).  This allows the LCD shield and the SDCard shield to use the same SPI but different CS pins.
 - Remove the current limiting resistor on the power LED, rotate, resolder, and solder jumper to pin ####.  This allows the power led to used as a general debug LED.
 
