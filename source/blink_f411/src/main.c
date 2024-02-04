@@ -56,6 +56,7 @@ int main(void)
     //configure the hardware
     gpio_init();
     gpio_button_init();
+    adc_init();         //pa1 - adc1 ch1 - need to configure PA1 as alternate function
 
     usart2_init();
     spi1_init();
@@ -108,7 +109,10 @@ int main(void)
         LCD_Clear(0x00);
         LCD_DrawStringKern(0, 3, "HELLO LCD");
 
-        LCD_DrawStringKern(2, 3, "Counter:");
+        size = snprintf(buffer, 32, "ADC: %d", adc_getValueFromDMA());
+        LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
+
+        LCD_DrawStringKern(3, 3, "Counter:");
 
         size = snprintf(buffer, 32, "Cnt: %d", counter);
         LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
@@ -141,6 +145,12 @@ int main(void)
 
 
         counter++;
+
+        //get a value of the adc - try this in normal conversion mode
+        //and assume the dma is not working
+
+        //volatile uint32_t adcValue = adc_getValueFromDMA();
+
 
         //read the buttonFlag
         if (buttonFlag == 1)

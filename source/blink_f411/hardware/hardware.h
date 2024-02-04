@@ -23,7 +23,8 @@
 //with the SPI interface
 
 ////////////////////////////////////////////
-//adc - joystick
+//adc - joystick - NOTE: use PA1 when using the
+//stm32f411 Nucleo board
 #define ADC_A0_Pin GPIO_Pin_0
 #define ADC_A0_GPIO_Port GPIOA
 #define ADC_A1_Pin GPIO_Pin_1
