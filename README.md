@@ -10,7 +10,7 @@ Modifications to the LCD shield:
 - Remove the current limiting resistor on the power LED, rotate, resolder, and solder jumper to pin A3 (PB0 on the nucleo label).  This allows the power led to used as a general debug LED.
 
 Modifications to the SD Card Shield:
-- Remove R1-R6 and make solder bridges across R1, R2, R4.  These are no longer needed since digital output signals from the Nucleo board are 3.3v.
+- Remove R1-R6 and make solder bridges across R4, R3, R5.  These are no longer needed since digital output signals from the Nucleo board are 3.3v.
 - Install jumper wire from 3.3v output of the regulator to the 3.3v pin output on the top of the shield.  Note:  The 3.3v output pin on the top of the shield does not carry through for other shields to be stacked on top.  Without the 3.3v signal, the LCD will not work.
 
 Other Hardware Added:
