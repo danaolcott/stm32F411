@@ -7,7 +7,7 @@ Modifications to the LCD shield:
 - cut the header pin that connects to the reset signal.  Solder jumper wire from the cut header pin (shield button) to D2 (PA10).  This allows the button on the shield to be used as user button rather than a reset button.
 - make a solder bridge between pins A0 and A1 (see top of the lcd shield).  Cut the header pin on A0 to prevent the signal from passing into the nucleo board.  The joystick should be configured to use A1 (PA1 on nucleo) as analog input.  Note:  This modification is not needed.  I did this when using the shield on the Atmel SAM70 development board and there was a pin conflict.
 - solder jumper wire from the SPI cs pin (D10 - arduino, PB6 - stm32 label) to D6 (PB10) and cut the pin on the header at D10.  Configure the CS pin to work on D6 (PB10).  This allows the LCD shield and the SDCard shield to use the same SPI but different CS pins.
-- Remove the current limiting resistor on the power LED, rotate, resolder, and solder jumper to pin ####.  This allows the power led to used as a general debug LED.
+- Remove the current limiting resistor on the power LED, rotate, resolder, and solder jumper to pin A3 (PB0 on the nucleo label).  This allows the power led to used as a general debug LED.
 
 Modifications to the SD Card Shield:
 - Remove R1-R6 and make solder bridges across R1, R2, R4.  These are no longer needed since digital output signals from the Nucleo board are 3.3v.
