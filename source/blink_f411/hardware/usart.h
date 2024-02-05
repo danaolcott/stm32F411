@@ -20,7 +20,7 @@ void usart2_init(void);
 void usart2_txByte(uint8_t data);
 void usart2_txData(uint8_t *data, uint8_t length);
 void usart2_txString(const char* data);
-
+void usart2_txStringLength(uint8_t* data, uint8_t length);
 void usart2_echo(uint8_t *data, uint8_t length);
 
 void usart2_interrupt_handler(void);

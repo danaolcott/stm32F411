@@ -41,7 +41,7 @@ SOFTWARE.
 //globals
 volatile uint32_t TimingDelay;
 
-char buffer[32] = {0x00};
+char buffer[64] = {0x00};
 int size = 0;
 
 int main(void)
@@ -57,7 +57,6 @@ int main(void)
     gpio_init();
     gpio_button_init();
     adc_init();         //pa1 - adc1 ch1 - need to configure PA1 as alternate function
-
     usart2_init();
     spi1_init();
 
@@ -97,72 +96,33 @@ int main(void)
     buttonFlag = 0;
 
     //make a file
-//    SD_FileCreate("counter.txt");
+    SD_FileCreate("counter.txt");
     char* msg = "This is the header in the counter file\r\n";
     SD_AppendData("counter.txt", msg, strlen(msg));
-
-    volatile int counter = 0;
 
     /* Infinite loop */
     while (1)
     {
         LCD_Clear(0x00);
-        LCD_DrawStringKern(0, 3, "HELLO LCD");
+        LCD_DrawStringKern(0, 3, "Hell0 LCD");
 
-        size = snprintf(buffer, 32, "ADC: %d", adc_getValueFromDMA());
+        //output the adc from the dma buffer and the register directly
+        size = snprintf(buffer, 32, "ADC: %d", (uint16_t)adc_getValueFromDMA());
         LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
 
-        LCD_DrawStringKern(3, 3, "Counter:");
-
-        size = snprintf(buffer, 32, "Cnt: %d", counter);
-        LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
-
-        //write the data to the sdcard, returns the number of
-        //bytes written if ok, returns a negative result if an
-        //error occured.
-        size = snprintf(buffer, 32, "Cnt: %d\r\n", counter);
-        int fres = SD_AppendData("counter.txt", buffer, size);
-
-        if (fres > 0)
-        {
-            size = snprintf(buffer, 32, "Bytes: %d", fres);
-            LCD_DrawStringKernLength(5, 3, (uint8_t*)buffer, size);
-
-            //open it again, get the file size and output to the lcd
-            uint32_t temp = 0;
-            fres = SD_GetFileSize("counter.txt", &temp);
-
-            LCD_DrawStringKern(6, 3, "Total Size:");
-            size = snprintf(buffer, 32, "%d", temp);
-            LCD_DrawStringKernLength(7, 3, (uint8_t*)buffer, size);
-
-        }
-        else        //error
-        {
-            size = snprintf(buffer, 32, "Error: %d", (-1)*fres);
-            LCD_DrawStringKernLength(5, 3, (uint8_t*)buffer, size);
-        }
-
-
-        counter++;
-
-        //get a value of the adc - try this in normal conversion mode
-        //and assume the dma is not working
-
-        //volatile uint32_t adcValue = adc_getValueFromDMA();
-
+        size = snprintf(buffer, 32, "ADC-DR: %d", (uint16_t)ADC1->DR);
+        LCD_DrawStringKernLength(3, 3, (uint8_t*)buffer, size);
 
         //read the buttonFlag
         if (buttonFlag == 1)
         {
-            usart2_txString("Hello from program\r\n");
-
+            //do something
             buttonFlag = 0;
         }
 
-        Delay(1000);
-//        GPIO_ToggleBits(GPIOA, GPIO_Pin_5);
+        gpio_shieldLedToggle();
 
+        Delay(500);
 
     }
 }

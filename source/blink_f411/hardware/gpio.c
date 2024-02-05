@@ -33,6 +33,8 @@ volatile uint8_t buttonFlag;
 //this maps to D6 on arduino pinout.  To use the
 //display going forwared, use PB10, and cut the pin
 //on D10 (PB6) since this will be shared with the sdcard
+
+//include PB0 for shield LED
 void gpio_init(void)
 {
     //init structs
@@ -40,6 +42,7 @@ void gpio_init(void)
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);   //port A clocks
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);   //port C clocks
+    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);   //port A clocks
 
     //PA8 and PA9 - backlight and reset pins
     GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8 | GPIO_Pin_9;
@@ -57,9 +60,18 @@ void gpio_init(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
     GPIO_Init(GPIOC, &GPIO_InitStructure);
 
+    //PB0 - shieldLed Pin
+    GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_0;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;            //configure for output
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+
     GPIO_ResetBits(GPIOA, GPIO_Pin_8);
     GPIO_ResetBits(GPIOA, GPIO_Pin_9);
     GPIO_ResetBits(GPIOC, GPIO_Pin_7);
+    GPIO_ResetBits(GPIOB, GPIO_Pin_0);
 }
 
 
@@ -128,6 +140,10 @@ void gpio_button_init(void)
     NVIC_Init(&NVIC_InitStructure);
 }
 
+void gpio_shieldLedToggle(void)
+{
+    GPIO_ToggleBits(shieldLed_GPIO_Port, shieldLed_Pin);
+}
 
 ////////////////////////////////////////
 //button interrupt handler for the

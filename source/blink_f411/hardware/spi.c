@@ -109,7 +109,6 @@ void spi1_init(void)
 
 void spi1_setSpeedHz(SPI_Speed_t speed)
 {
-    //TODO:  write the spi1_setSpeedHz function
     SPI_InitTypeDef   SPI_InitStruct;
 
     SPI_Cmd(SPI1, DISABLE); // disable the SPI1

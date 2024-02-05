@@ -14,6 +14,7 @@
 #include "usart.h"
 #include "main.h"
 #include "hardware.h"
+#include "cli.h"
 
 ///////////////////////////////////////////
 //usart2 receive buffers and counters
@@ -105,6 +106,14 @@ void usart2_txString(const char* data)
         usart2_txByte(data[i]);
 }
 
+///////////////////////////////////////////////
+void usart2_txStringLength(uint8_t* data, uint8_t length)
+{
+    uint8_t i = 0;
+
+    for (i = 0 ; i < length ; i++)
+        usart2_txByte(data[i]);
+}
 
 ////////////////////////////////////////
 //called from the system_it.c
@@ -116,10 +125,13 @@ void usart2_txString(const char* data)
 //
 void usart2_interrupt_handler(void)
 {
+    uint8_t temp = 0;
+    uint8_t data = 0;
+
     //test RXNE flag
     if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
     {
-        uint8_t data = USART2->DR;
+        data = USART2->DR;
 
         if (rxIndex < (RX_BUFFER_SIZE - 1))
         {
@@ -132,17 +144,16 @@ void usart2_interrupt_handler(void)
                 {
                     //end of the string
                     rxBuffer1[rxIndex] = 0x00;
+                    temp = rxIndex - 1;
+                    rxBuffer1[rxIndex - 1] = 0x00;
 
-                    //pass the buffer to a command handler
-                    //for now, just echo it right back
-                    //cli_processCommand((uint8_t*)comRxBuffer1, (uint16_t)comRxIndex);
-                    usart2_txData((uint8_t*)rxBuffer1, rxIndex);
-
-
-                    //flip buffer, clear the buffer, reset the index
+                    //flip the buffers for new data incoming to rxBuffer2
                     memset((uint8_t*)rxBuffer2, 0x00, RX_BUFFER_SIZE);
                     rxActiveBuffer = 2;
                     rxIndex = 0x00;
+
+                    //process the command using temp and rxBuffer1
+                    cli_processBuffer((uint8_t*)rxBuffer1, temp);
                 }
             }
 
@@ -156,15 +167,16 @@ void usart2_interrupt_handler(void)
                 {
                     //end of the string
                     rxBuffer2[rxIndex] = 0x00;
+                    temp = rxIndex - 1;
+                    rxBuffer2[rxIndex - 1] = 0x00;
 
-                    //pass the buffer to the command handler
-                    //cli_processCommand((uint8_t*)comRxBuffer2, (uint16_t)comRxIndex);
-                    usart2_txData((uint8_t*)rxBuffer2, rxIndex);
-
-                    //flip buffer, clear the buffer, reset the index
+                    //flip the buffers for new data incoming to rxBuffer1
                     memset((uint8_t*)rxBuffer1, 0x00, RX_BUFFER_SIZE);
                     rxActiveBuffer = 1;
                     rxIndex = 0x00;
+
+                    //process the command using temp and rxBuffer2
+                    cli_processBuffer((uint8_t*)rxBuffer2, temp);
                 }
             }
         }

@@ -18,7 +18,7 @@ void gpio_init(void);
 void gpio_button_init(void);
 void gpio_button_handler(void);
 
-
+void gpio_shieldLedToggle(void);
 
 
 #endif /* GPIO_H_ */

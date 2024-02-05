@@ -21,6 +21,9 @@
 
 //leds - note: green led on the board is shared
 //with the SPI interface
+//routed the shield led to PB0 (A3 on arduino header)
+#define shieldLed_Pin GPIO_Pin_0
+#define shieldLed_GPIO_Port GPIOB
 
 ////////////////////////////////////////////
 //adc - joystick - NOTE: use PA1 when using the
