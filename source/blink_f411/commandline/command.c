@@ -19,14 +19,16 @@
 //see below for function definitions
 static void cmdHelp(int argc, char** argv);
 static void cmdEcho(int argc, char** argv);
+static void cmdADC(int argc, char** argv);
 
 ////////////////////////////////////////////
 //CommandStruct commandTable
 
-static const CommandStruct commandTable[3] =
+static const CommandStruct commandTable[4] =
 {
     {"?",       "Print Help",   cmdHelp},
     {"echo",    "echo args and num args", cmdEcho},
+    {"adc",    "Register dump of adc1", cmdADC},
     {NULL, NULL, NULL},
 };
 
@@ -67,6 +69,25 @@ void cmdEcho(int argc, char** argv)
 }
 
 
+
+static void cmdADC(int argc, char** argv)
+{
+    uint8_t buffer[64];
+    uint8_t length;
+    uint8_t i;
+
+    usart2_txString("Register Dump of ADC1:\r\n");
+
+    length = snprintf((char*)buffer, 32, "ADC1-DR: 0x%04x\r\n", (uint16_t)ADC1->DR);
+    usart2_txStringLength(buffer, length);
+    length = snprintf((char*)buffer, 32, "ADC1-SR: 0x%04x\r\n", (uint16_t)ADC1->SR);
+    usart2_txStringLength(buffer, length);
+    length = snprintf((char*)buffer, 32, "ADC1-CR1: 0x%04x\r\n", (uint16_t)ADC1->CR1);
+    usart2_txStringLength(buffer, length);
+    length = snprintf((char*)buffer, 32, "ADC1-CR2: 0x%04x\r\n", (uint16_t)ADC1->CR2);
+    usart2_txStringLength(buffer, length);
+
+}
 
 /////////////////////////////////////////////
 //Command_ExeCommand

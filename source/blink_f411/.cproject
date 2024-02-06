@@ -41,6 +41,7 @@
 									<listOptionValue builtIn="false" value="../bitmap"/>
 									<listOptionValue builtIn="false" value="../sdcard"/>
 									<listOptionValue builtIn="false" value=".././commandline"/>
+									<listOptionValue builtIn="false" value=".././utility"/>
 								</option>
 								<inputType id="com.atollic.truestudio.as.input.276012899" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
@@ -59,6 +60,7 @@
 									<listOptionValue builtIn="false" value="../bitmap"/>
 									<listOptionValue builtIn="false" value="../sdcard"/>
 									<listOptionValue builtIn="false" value=".././commandline"/>
+									<listOptionValue builtIn="false" value=".././utility"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.endianess.430891010" name="Endianess" superClass="com.atollic.truestudio.common_options.target.endianess"/>
 								<option id="com.atollic.truestudio.common_options.target.mcpu.2131891837" name="Microcontroller" superClass="com.atollic.truestudio.common_options.target.mcpu" value="STM32F411RE" valueType="enumerated"/>
@@ -142,6 +144,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hardware"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="sdcard"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="utility"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -187,8 +190,8 @@
 									<listOptionValue builtIn="false" value="../display"/>
 									<listOptionValue builtIn="false" value="../bitmap"/>
 									<listOptionValue builtIn="false" value="../sdcard"/>
-									<listOptionValue builtIn="false" value="../commandline"/>
 									<listOptionValue builtIn="false" value=".././commandline"/>
+									<listOptionValue builtIn="false" value=".././utility"/>
 								</option>
 								<inputType id="com.atollic.truestudio.as.input.1203179825" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
@@ -208,8 +211,8 @@
 									<listOptionValue builtIn="false" value="../display"/>
 									<listOptionValue builtIn="false" value="../bitmap"/>
 									<listOptionValue builtIn="false" value="../sdcard"/>
-									<listOptionValue builtIn="false" value="../commandline"/>
 									<listOptionValue builtIn="false" value=".././commandline"/>
+									<listOptionValue builtIn="false" value=".././utility"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.endianess.1762156813" name="Endianess" superClass="com.atollic.truestudio.common_options.target.endianess"/>
 								<option id="com.atollic.truestudio.common_options.target.mcpu.864776136" name="Microcontroller" superClass="com.atollic.truestudio.common_options.target.mcpu" value="STM32F411RE" valueType="enumerated"/>
@@ -272,6 +275,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="commandline"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="display"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="utility"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

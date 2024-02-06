@@ -122,7 +122,7 @@ int main(void)
 
         gpio_shieldLedToggle();
 
-        Delay(500);
+        Delay(1000);
 
     }
 }
