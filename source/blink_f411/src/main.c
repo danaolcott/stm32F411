@@ -46,6 +46,21 @@ int size = 0;
 
 int main(void)
 {
+    //configure the system clock
+    //use HSI clock 16mhz.  want to config the system to run at 100mhz,
+    //HAL uses the following values:
+//    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+//      RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+//      RCC_OscInitStruct.HSICalibrationValue = 16;
+//      RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+//      RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+//      RCC_OscInitStruct.PLL.PLLM = 8;
+//      RCC_OscInitStruct.PLL.PLLN = 100;
+//      RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+//      RCC_OscInitStruct.PLL.PLLQ = 4;
+    //SystemClockConfig(uint32_t PLL_M, uint32_t PLL_N, uint32_t PLL_P, uint32_t PLL_Q, uint32_t PLL_R);
+    //the parameter R - not available on F411 - so might cause an error
+   // SystemClockConfig(8, 100, 2, 4);
 
     //Configure the systick with interrupts, HSI = 16Mhz
     if (SysTick_Config(SystemCoreClock / 1000))
@@ -88,12 +103,6 @@ int main(void)
 
     LCD_DrawStringKern(4, 3, "Press Btn ...");
 
-    while (!buttonFlag)
-    {
-
-    }
-
-    buttonFlag = 0;
 
     //make a file
     SD_FileCreate("counter.txt");
@@ -107,16 +116,20 @@ int main(void)
         LCD_DrawStringKern(0, 3, "Hell0 LCD");
 
         //output the adc from the dma buffer and the register directly
-        size = snprintf(buffer, 32, "ADC: %d", (uint16_t)adc_getValueFromDMA());
+        size = snprintf(buffer, 32, "ADC1: %d", adc_getValueFromDMA());
         LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
 
         size = snprintf(buffer, 32, "ADC-DR: %d", (uint16_t)ADC1->DR);
         LCD_DrawStringKernLength(3, 3, (uint8_t*)buffer, size);
 
+        size = snprintf(buffer, 32, "OverRun: %d", adc_getError());
+        LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
+
         //read the buttonFlag
         if (buttonFlag == 1)
         {
             //do something
+            gpio_shieldLedToggle();
             buttonFlag = 0;
         }
 
@@ -145,5 +158,40 @@ void TimingDelay_Decrement(void)
         TimingDelay--;
 }
 
+
+/////////////////////////////////////////////////
+//Configures the system core clock to run with the
+//PLL.
+void SystemClockConfig(uint32_t PLL_M, uint32_t PLL_N, uint32_t PLL_P, uint32_t PLL_Q)
+{
+    volatile uint16_t timeout;
+
+    RCC->CR |= RCC_CR_HSION;                            //enable the HSI clock
+
+    timeout = 0xFFFF;
+    while (!(RCC->CR & RCC_CR_HSIRDY) && timeout--);    //wait until the HSI clock is ready
+
+    RCC->CFGR = (RCC->CFGR & ~(RCC_CFGR_SW)) | RCC_CFGR_SW_HSI;     //set HSI clock as the main clock
+
+    RCC->CR &= ~RCC_CR_PLLON;           //make sure the PLL is off
+
+    //load the PLL settings into the PLLCFG register
+    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLM_MASK) | ((PLL_M << RCC_PLLM_POS) & RCC_PLLM_MASK);
+    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLN_MASK) | ((PLL_N << RCC_PLLN_POS) & RCC_PLLN_MASK);
+    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLP_MASK) | ((((PLL_P >> 1) - 1) << RCC_PLLP_POS) & RCC_PLLP_MASK);
+    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLQ_MASK) | ((PLL_Q << RCC_PLLQ_POS) & RCC_PLLQ_MASK);
+
+    RCC->CR |= RCC_CR_PLLON;            //enable the PLL
+
+    //wait for the PLL to start
+    timeout = 0xFFFF;
+    while ((!(RCC->CR & RCC_CR_PLLRDY)) && timeout--);
+
+    //set the PLL as the main clock
+    RCC->CFGR = (RCC->CFGR & ~(RCC_CFGR_SW)) | RCC_CFGR_SW_PLL;
+
+    //update the system core clock
+    SystemCoreClockUpdate();
+}
 
 

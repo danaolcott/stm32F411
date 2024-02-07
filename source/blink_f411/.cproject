@@ -48,8 +48,8 @@
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.gcc.523821796" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc">
 								<option id="com.atollic.truestudio.gcc.symbols.defined.1293726346" name="Defined symbols" superClass="com.atollic.truestudio.gcc.symbols.defined" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32F411xE"/>
-									<listOptionValue builtIn="false" value="STM32F4XX"/>
 									<listOptionValue builtIn="false" value="USE_STDPERIPH_DRIVER"/>
+									<listOptionValue builtIn="false" value="STM32F4XX"/>
 								</option>
 								<option id="com.atollic.truestudio.gcc.directories.select.1099792319" name="Include path" superClass="com.atollic.truestudio.gcc.directories.select" valueType="includePath">
 									<listOptionValue builtIn="false" value="../src"/>
@@ -117,6 +117,7 @@
 							<tool id="com.atollic.truestudio.exe.debug.toolchain.secoutput.39094668" name="Other" superClass="com.atollic.truestudio.exe.debug.toolchain.secoutput"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.atollic.truestudio.exe.debug.584812212.731138018" name="stm32f4xx.h" rcbsApplicability="disable" resourcePath="src/stm32f4xx.h" toolsToInvoke=""/>
 					<folderInfo id="com.atollic.truestudio.exe.debug.584812212.287681430" name="/" resourcePath="hardware">
 						<toolChain id="com.atollic.truestudio.exe.debug.toolchain.165557612" name="Atollic ARM Tools" superClass="com.atollic.truestudio.exe.debug.toolchain" unusedChildren="">
 							<option id="com.atollic.truestudio.general.runtimelib.1322489369.2119531277" name="Runtime Library" superClass="com.atollic.truestudio.general.runtimelib.1322489369"/>
@@ -141,8 +142,8 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="bitmap"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="commandline"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="display"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="hardware"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="sdcard"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="hardware"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="sdcard"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="utility"/>
 					</sourceEntries>

@@ -74,7 +74,6 @@ static void cmdADC(int argc, char** argv)
 {
     uint8_t buffer[64];
     uint8_t length;
-    uint8_t i;
 
     usart2_txString("Register Dump of ADC1:\r\n");
 

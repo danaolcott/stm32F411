@@ -636,7 +636,6 @@ void rcvr_spi_multi (BYTE *buff, UINT btr)
 void xmit_spi_multi (const BYTE *buff, UINT btx)
 {
     uint8_t result;
-
     for (int i = 0 ; i < btx ; i++)
     {
         result = spi1_txByte(buff[i]);

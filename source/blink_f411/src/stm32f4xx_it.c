@@ -35,6 +35,7 @@
 #include "gpio.h"
 #include "usart.h"
 #include "sdcard_driver.h"
+#include "adc.h"
 
 /** @addtogroup Template_Project
   * @{
@@ -176,6 +177,13 @@ void EXTI15_10_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
     usart2_interrupt_handler();
+}
+
+
+///////////////////////////////////////
+void ADC_IRQHandler(void)
+{
+    adc_interrupt_handler();
 }
 
 

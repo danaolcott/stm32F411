@@ -22,8 +22,8 @@
 
 //from reading the registers during debug
 #define ADC1_DR_Address    0x4001204C        //value in the SFR
-volatile uint32_t RawADCDataValues[2];           //single channel
-
+volatile uint16_t RawADCDataValues[2];           //single channel
+static volatile uint16_t adcOverRunError = 0;
 
 ///////////////////////////////////////////////
 //adc_dummy delay - used to test clocks starting up
@@ -33,6 +33,14 @@ void adc_dummy_delay(volatile uint16_t time)
     while (temp > 0)
         temp--;
 }
+
+
+/////////////////////////////////////////
+uint16_t adc_getError(void)
+{
+    return adcOverRunError;
+}
+
 
 /////////////////////////////////////////
 //Configure ADC on PA1 for use with the
@@ -49,6 +57,8 @@ void adc_init(void)
     ADC_CommonInitTypeDef ADC_CommonInitStructure;
     ADC_InitTypeDef ADC_InitStructure;
     DMA_InitTypeDef DMA_InitStructure;
+    NVIC_InitTypeDef NVIC_InitStructure;
+
 
     RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);   //port A clocks
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);    // ADC Clock
@@ -63,15 +73,15 @@ void adc_init(void)
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)ADC1_DR_Address;
     DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&RawADCDataValues[0];
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
-    DMA_InitStructure.DMA_BufferSize = 2;                               //number of data units - ie, 1/2 word
+    DMA_InitStructure.DMA_BufferSize = 1;                               //number of data units - ie, 1/2 word
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Disable;                //only 1 location to write to
+    DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;                //only 1 location to write to
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
     DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
     DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
 
-    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
     DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
     DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
@@ -79,6 +89,13 @@ void adc_init(void)
     DMA_Init(DMA2_Stream0, &DMA_InitStructure);
     DMA_Cmd(DMA2_Stream0, ENABLE);
 
+    //some checks here - test flags in the dma to make sure something is
+    //enabled, clocks running, etc.
+
+    //DMA_GetCmdStatus()
+    //DMA_GetFlagStatus()
+    //DMA_GetCmdStatus()
+    //DMA_GetFlagStatus(DMA2_Stream0, )
 
     //configure PA1 as analog input for adc1 ch1
     GPIO_StructInit(&GPIO_InitStructure);
@@ -88,7 +105,6 @@ void adc_init(void)
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
-
 
     //initialize adc common init structure
     ADC_CommonStructInit(&ADC_CommonInitStructure);
@@ -104,17 +120,28 @@ void adc_init(void)
     ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
     ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
     ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
-    ADC_InitStructure.ADC_ScanConvMode = DISABLE;
+    ADC_InitStructure.ADC_ScanConvMode = ENABLE;
     ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
     ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1;
-    ADC_InitStructure.ADC_NbrOfConversion = 1;
+    ADC_InitStructure.ADC_NbrOfConversion = 2;
     ADC_Init(ADC1, &ADC_InitStructure);
 
     ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_480Cycles);
+    ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 2, ADC_SampleTime_480Cycles);
 
     ADC_DMARequestAfterLastTransferCmd(ADC1, ENABLE);
     ADC_DMACmd(ADC1, ENABLE);
     ADC_Cmd(ADC1, ENABLE);
+
+    //configure the overrun interrupt for adc1, ch1
+    ADC_ITConfig(ADC1, ADC_IT_OVR, ENABLE);
+
+    //configure ADC interrupts - overrun flag
+    NVIC_InitStructure.NVIC_IRQChannel = ADC_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 
     ADC_SoftwareStartConv(ADC1);
 }
@@ -138,3 +165,33 @@ uint16_t adc_getSingleScanValue(void)
 
     return result;
 }
+
+
+/////////////////////////////////////////////
+//Interrupt is enabled for the adc overrun
+//Normally there is no overrun if you run
+//in debug mode, but after power cycle or
+//reset, the ADC overrun would trigger, and
+//stop the DMA.  If it triggers, reset the
+//flags, and re-init the adc.  Log an error
+//everytime this triggers.
+//TODO:  research how to recover from adc overrun.
+//
+void adc_interrupt_handler(void)
+{
+    if (ADC_GetITStatus(ADC1, ADC_IT_OVR) != RESET)
+    {
+        //do something....
+        ADC_ClearFlag(ADC1, ADC_FLAG_OVR);
+        ADC_ClearITPendingBit(ADC1, ADC_IT_OVR);
+
+        adcOverRunError++;
+
+        adc_init();
+    }
+}
+
+
+
+
+

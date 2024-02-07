@@ -50,6 +50,7 @@ void SysTick_Handler(void);
 
 void EXTI15_10_IRQHandler(void);
 void USART2_IRQHandler(void);
+void ADC_IRQHandler(void);
 
 #ifdef __cplusplus
 }
