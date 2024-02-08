@@ -109,7 +109,7 @@ void adc_init(void)
     //initialize adc common init structure
     ADC_CommonStructInit(&ADC_CommonInitStructure);
     ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
-    ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div2;
+    ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div6;
     ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
     ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
     ADC_CommonInit(&ADC_CommonInitStructure);
@@ -181,13 +181,19 @@ void adc_interrupt_handler(void)
 {
     if (ADC_GetITStatus(ADC1, ADC_IT_OVR) != RESET)
     {
-        //do something....
+        //From page 224 in the programmers manual:
+        //To recover from an overrun, need to clear the OVR flag
+        //and set the DMAEN bit used in the DMA streeam.  Also need to
+        //reinitialize both the DMA and ADC to continue to the
+        //conversion / transfer process
+
         ADC_ClearFlag(ADC1, ADC_FLAG_OVR);
         ADC_ClearITPendingBit(ADC1, ADC_IT_OVR);
 
-        adcOverRunError++;
+        //sets the enable bit on DMA2, stream0
+        DMA_Cmd(DMA2_Stream0, ENABLE);
 
-        adc_init();
+        adcOverRunError++;
     }
 }
 

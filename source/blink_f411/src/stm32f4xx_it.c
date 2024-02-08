@@ -36,6 +36,8 @@
 #include "usart.h"
 #include "sdcard_driver.h"
 #include "adc.h"
+#include "timer.h"
+
 
 /** @addtogroup Template_Project
   * @{
@@ -186,7 +188,10 @@ void ADC_IRQHandler(void)
     adc_interrupt_handler();
 }
 
-
+void TIM2_IRQHandler(void)
+{
+    timer2_interrupt_handler();
+}
 /**
   * @brief  This function handles PPP interrupt request.
   * @param  None

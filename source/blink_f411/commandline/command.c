@@ -20,15 +20,18 @@
 static void cmdHelp(int argc, char** argv);
 static void cmdEcho(int argc, char** argv);
 static void cmdADC(int argc, char** argv);
+static void cmdTimer2(int argc, char** argv);
+
 
 ////////////////////////////////////////////
 //CommandStruct commandTable
 
-static const CommandStruct commandTable[4] =
+static const CommandStruct commandTable[5] =
 {
     {"?",       "Print Help",   cmdHelp},
     {"echo",    "echo args and num args", cmdEcho},
     {"adc",    "Register dump of adc1", cmdADC},
+    {"timer2",    "Toggle Timer 2", cmdTimer2},
     {NULL, NULL, NULL},
 };
 
@@ -87,6 +90,28 @@ static void cmdADC(int argc, char** argv)
     usart2_txStringLength(buffer, length);
 
 }
+
+
+
+////////////////////////////////////////////
+//Toggle Timer 2 on and off.
+static void cmdTimer2(int argc, char** argv)
+{
+    usart2_txString("Toggle Timer\r\n");
+
+    if (argc == 1)
+    {
+        timer2_toggle();
+    }
+    else if (argc == 2)
+    {
+        if (!strcmp(argv[1], "on"))
+            timer2_start();
+        else
+            timer2_stop();
+    }
+}
+
 
 /////////////////////////////////////////////
 //Command_ExeCommand

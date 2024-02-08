@@ -239,10 +239,16 @@ void SystemInit(void)
   */
 void SystemCoreClockUpdate(void)
 {
-  uint32_t tmp = 0, pllvco = 0, pllp = 2, pllsource = 0, pllm = 2;
+  volatile uint32_t tmp = 0, pllvco = 0, pllp = 2, pllsource = 0, pllm = 2;
   
   /* Get SYSCLK source -------------------------------------------------------*/
   tmp = RCC->CFGR & RCC_CFGR_SWS;
+
+  //This is hack.....  tmp is evaluating to 0x02, which is not
+  //correct, since the mask is 0x0C and temp is 0x0A, which
+  //should make ths case 0x08!!!  tmp is not being computed,
+  //evaluated correctly....  not sure why
+  //tmp = 0x08;
 
   switch (tmp)
   {

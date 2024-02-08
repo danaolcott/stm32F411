@@ -17,6 +17,7 @@
 #include "usart.h"
 #include "spi.h"
 #include "adc.h"
+#include "timer.h"
 #include "lcd_12864_dfrobot.h"
 #include "sdcard_driver.h"
 #include "cli.h"

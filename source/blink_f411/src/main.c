@@ -47,20 +47,17 @@ int size = 0;
 int main(void)
 {
     //configure the system clock
-    //use HSI clock 16mhz.  want to config the system to run at 100mhz,
-    //HAL uses the following values:
-//    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-//      RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-//      RCC_OscInitStruct.HSICalibrationValue = 16;
-//      RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-//      RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-//      RCC_OscInitStruct.PLL.PLLM = 8;
-//      RCC_OscInitStruct.PLL.PLLN = 100;
-//      RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-//      RCC_OscInitStruct.PLL.PLLQ = 4;
-    //SystemClockConfig(uint32_t PLL_M, uint32_t PLL_N, uint32_t PLL_P, uint32_t PLL_Q, uint32_t PLL_R);
-    //the parameter R - not available on F411 - so might cause an error
-   // SystemClockConfig(8, 100, 2, 4);
+    //SystemClockConfig(uint32_t PLL_M, uint32_t PLL_N, uint32_t PLL_P, uint32_t PLL_Q);
+    //to get the max speed:  system clock 100 mhz, ahpb, apb buses, 50mhz
+    //use the following
+    //m = 16 - match the hsi clock speed
+    //n = 400
+    //P = 4 - this divides it back down to get to 100mhz
+    //Q = 4??  this is another divider for the peripheral clocks
+    //default values
+//    SystemClockConfig(16, 192, 2, 4);
+    //this is recommended
+//    SystemClockConfig(16, 400, 4, 4);
 
     //Configure the systick with interrupts, HSI = 16Mhz
     if (SysTick_Config(SystemCoreClock / 1000))
@@ -74,6 +71,7 @@ int main(void)
     adc_init();         //pa1 - adc1 ch1 - need to configure PA1 as alternate function
     usart2_init();
     spi1_init();
+    timer2_init(TIMER_SPEED_10HZ);
 
     LCD_Config();
     LCD_BacklightOn();
@@ -162,9 +160,36 @@ void TimingDelay_Decrement(void)
 /////////////////////////////////////////////////
 //Configures the system core clock to run with the
 //PLL.
+
+//default M = 16
+//default P = 2
+//default N - bits 13 and 12 are high - default is 192
+//default Q = 4
+
 void SystemClockConfig(uint32_t PLL_M, uint32_t PLL_N, uint32_t PLL_P, uint32_t PLL_Q)
 {
+
+    //From the HAL libs.....  things that I might be missing...
+    //NOTE Need to turn on the clocks for the power source for the PLL??
+    //SET_BIT(RCC->APB1ENR, RCC_APB1ENR_PWREN);\
+
+    //  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+
+//    define __HAL_PWR_VOLTAGESCALING_CONFIG(__REGULATOR__) do {                                                     \
+//                                                                __IO uint32_t tmpreg = 0x00U;                        \
+//                                                                MODIFY_REG(PWR->CR, PWR_CR_VOS, (__REGULATOR__));   \
+//                                                                /* Delay after an RCC peripheral clock enabling */  \
+//                                                                tmpreg = READ_BIT(PWR->CR, PWR_CR_VOS);             \
+//                                                                UNUSED(tmpreg);                                     \
+ //                                                             } while(0U)
+
+
+
     volatile uint16_t timeout;
+
+    RCC_APB1PeriphClockCmd(RCC_APB1ENR_PWREN, ENABLE);   //power enable clocks??
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+
 
     RCC->CR |= RCC_CR_HSION;                            //enable the HSI clock
 
@@ -176,10 +201,10 @@ void SystemClockConfig(uint32_t PLL_M, uint32_t PLL_N, uint32_t PLL_P, uint32_t 
     RCC->CR &= ~RCC_CR_PLLON;           //make sure the PLL is off
 
     //load the PLL settings into the PLLCFG register
-    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLM_MASK) | ((PLL_M << RCC_PLLM_POS) & RCC_PLLM_MASK);
-    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLN_MASK) | ((PLL_N << RCC_PLLN_POS) & RCC_PLLN_MASK);
-    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLP_MASK) | ((((PLL_P >> 1) - 1) << RCC_PLLP_POS) & RCC_PLLP_MASK);
-    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLQ_MASK) | ((PLL_Q << RCC_PLLQ_POS) & RCC_PLLQ_MASK);
+//    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLM_MASK) | ((PLL_M << RCC_PLLM_POS) & RCC_PLLM_MASK);             //default value M = 16
+//    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLN_MASK) | ((PLL_N << RCC_PLLN_POS) & RCC_PLLN_MASK);             //default value N = 256?
+//    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLP_MASK) | ((((PLL_P >> 1) - 1) << RCC_PLLP_POS) & RCC_PLLP_MASK);
+//    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLQ_MASK) | ((PLL_Q << RCC_PLLQ_POS) & RCC_PLLQ_MASK);
 
     RCC->CR |= RCC_CR_PLLON;            //enable the PLL
 
