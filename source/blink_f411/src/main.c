@@ -71,7 +71,8 @@ int main(void)
     adc_init();         //pa1 - adc1 ch1 - need to configure PA1 as alternate function
     usart2_init();
     spi1_init();
-    timer2_init(TIMER_SPEED_10HZ);
+    timer2_init(TIMER_SPEED_8KHZ);
+    wav_init();
 
     LCD_Config();
     LCD_BacklightOn();
@@ -99,39 +100,45 @@ int main(void)
         LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
     }
 
-    LCD_DrawStringKern(4, 3, "Press Btn ...");
+    //load the wav file from the sdcard and read the header
+    //into a buffer
+    WavFileHeader wavHeader;
+
+    wav_readHeader("RING.wav", &wavHeader);
 
 
-    //make a file
-    SD_FileCreate("counter.txt");
-    char* msg = "This is the header in the counter file\r\n";
-    SD_AppendData("counter.txt", msg, strlen(msg));
 
     /* Infinite loop */
     while (1)
     {
-        LCD_Clear(0x00);
-        LCD_DrawStringKern(0, 3, "Hell0 LCD");
+        //only do something with the LCD if not accessing
+        //the file.
+        if (!wav_getSoundPlayStatus())
+        {
+            LCD_Clear(0x00);
+            LCD_DrawStringKern(0, 3, "Hell0 LCD");
 
-        //output the adc from the dma buffer and the register directly
-        size = snprintf(buffer, 32, "ADC1: %d", adc_getValueFromDMA());
-        LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
+            //output the adc from the dma buffer and the register directly
+            size = snprintf(buffer, 32, "ADC1: %d", adc_getValueFromDMA());
+            LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
 
-        size = snprintf(buffer, 32, "ADC-DR: %d", (uint16_t)ADC1->DR);
-        LCD_DrawStringKernLength(3, 3, (uint8_t*)buffer, size);
+            size = snprintf(buffer, 32, "ADC-DR: %d", (uint16_t)ADC1->DR);
+            LCD_DrawStringKernLength(3, 3, (uint8_t*)buffer, size);
 
-        size = snprintf(buffer, 32, "OverRun: %d", adc_getError());
-        LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
+            size = snprintf(buffer, 32, "OverRun: %d", adc_getError());
+            LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
 
-        //read the buttonFlag
+            timer2_stop();
+            gpio_shieldLedToggle();
+        }
+
+        //get the button status...
         if (buttonFlag == 1)
         {
-            //do something
-            gpio_shieldLedToggle();
+            wav_playSound("RING.WAV");
             buttonFlag = 0;
         }
 
-        gpio_shieldLedToggle();
 
         Delay(1000);
 

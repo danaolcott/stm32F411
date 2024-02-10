@@ -9,6 +9,8 @@
 #include "main.h"
 #include "timer.h"
 
+volatile uint32_t gTimer2Counter = 0;
+
 
 /////////////////////////////////////////////////
 //Configure Timer2 with interrupts
@@ -53,12 +55,30 @@ void timer2_init(Timer_Speed hz)
             reloadValue = 999;
             break;
         }
+        case TIMER_SPEED_8KHZ:
+        {
+            PrescalerValue = (uint16_t)8 - 1;
+            reloadValue = 249;
+            break;
+        }
         //Note:  Params for 11khz is not exact, it's about 0.2% off
         //compared to the systick timer.
         case TIMER_SPEED_11KHZ:
         {
             PrescalerValue = (uint16_t)4 - 1;
             reloadValue = 363 - 1;
+            break;
+        }
+        case TIMER_SPEED_22KHZ:
+        {
+            PrescalerValue = (uint16_t)4 - 1;
+            reloadValue = 363 - 1;
+            break;
+        }
+        case TIMER_SPEED_44KHZ:
+        {
+            PrescalerValue = 1;
+            reloadValue = 800 - 1;
             break;
         }
         default:
@@ -116,6 +136,11 @@ void timer2_interrupt_handler(void)
         TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
 
         gpio_shieldLedToggle();
+
+        //for playing the sound
+        wav_soundInterruptHandler();
+
+        gTimer2Counter++;
     }
 }
 

@@ -33,8 +33,10 @@ volatile uint8_t buttonFlag;
 //this maps to D6 on arduino pinout.  To use the
 //display going forwared, use PB10, and cut the pin
 //on D10 (PB6) since this will be shared with the sdcard
-
 //include PB0 for shield LED
+//
+//configure the 5 bit dac pins for sound output
+////PB13, PB14, PB15, PB1, PB2
 void gpio_init(void)
 {
     //init structs
@@ -68,10 +70,19 @@ void gpio_init(void)
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
+    //DAC output pins for sound
+    GPIO_InitStructure.GPIO_Pin =  DAC_Bit0_Pin | DAC_Bit1_Pin | DAC_Bit2_Pin | DAC_Bit3_Pin | DAC_Bit4_Pin;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;            //configure for output
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
+    GPIO_Init(DAC_GPIO_Port, &GPIO_InitStructure);
+
     GPIO_ResetBits(GPIOA, GPIO_Pin_8);
     GPIO_ResetBits(GPIOA, GPIO_Pin_9);
     GPIO_ResetBits(GPIOC, GPIO_Pin_7);
     GPIO_ResetBits(GPIOB, GPIO_Pin_0);
+    GPIO_ResetBits(DAC_GPIO_Port, DAC_Bit0_Pin | DAC_Bit1_Pin | DAC_Bit2_Pin | DAC_Bit3_Pin | DAC_Bit4_Pin);
 }
 
 

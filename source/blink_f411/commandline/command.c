@@ -13,6 +13,7 @@
 #include "command.h"
 #include "usart.h"
 #include "cli.h"
+#include "sdcard_driver.h"
 
 ///////////////////////////////////////////////
 //static function prototype defs
@@ -21,17 +22,20 @@ static void cmdHelp(int argc, char** argv);
 static void cmdEcho(int argc, char** argv);
 static void cmdADC(int argc, char** argv);
 static void cmdTimer2(int argc, char** argv);
-
+static void cmdPrintDir(int argc, char** argv);
+static void cmdPlaySound(int argc, char** argv);
 
 ////////////////////////////////////////////
 //CommandStruct commandTable
 
-static const CommandStruct commandTable[5] =
+static const CommandStruct commandTable[7] =
 {
     {"?",       "Print Help",   cmdHelp},
     {"echo",    "echo args and num args", cmdEcho},
     {"adc",    "Register dump of adc1", cmdADC},
     {"timer2",    "Toggle Timer 2", cmdTimer2},
+    {"dir",    "print sdcard dir", cmdPrintDir},
+    {"play",    "play sound (filename)", cmdPlaySound},
     {NULL, NULL, NULL},
 };
 
@@ -110,7 +114,67 @@ static void cmdTimer2(int argc, char** argv)
         else
             timer2_stop();
     }
+    else if (argc == 3)
+    {
+        //reset the timer based on arg2, values in khz
+        //timer2 set 11  - resets the timer to 11khz
+        if (!strcmp(argv[1], "set"))
+        {
+            if (!strcmp(argv[2], "1"))
+                timer2_init(TIMER_SPEED_1KHZ);
+            else if (!strcmp(argv[2], "8"))
+                timer2_init(TIMER_SPEED_8KHZ);
+            else if (!strcmp(argv[2], "11"))
+                timer2_init(TIMER_SPEED_11KHZ);
+            else if (!strcmp(argv[2], "22"))
+                timer2_init(TIMER_SPEED_22KHZ);
+            else if (!strcmp(argv[2], "44"))
+                timer2_init(TIMER_SPEED_44KHZ);
+            else
+            {
+                usart2_txString("Invalid Timer value");
+            }
+        }
+    }
 }
+
+
+////////////////////////////////////////////////
+//Prints the directory of the sd card
+//use the sd card write buffer
+//SD_writeBuffer
+static void cmdPrintDir(int argc, char** argv)
+{
+    uint16_t length = 0;
+    memset(SD_writeBuffer, 0x00, SD_WRITE_BUFFER_SIZE);
+
+    length = SD_PrintFileToBuffer("DIR.TXT", SD_writeBuffer, SD_WRITE_BUFFER_SIZE);
+
+    usart2_txString("Contents of the sdcard:r\n");
+    usart2_txStringLength(SD_writeBuffer, length);
+    usart2_txString("r\n");
+
+}
+
+/////////////////////////////////////////////////
+//Plays a sound file from the sd card
+//arg1 - file name
+//assumes the file is valid
+static void cmdPlaySound(int argc, char** argv)
+{
+    uint8_t length;
+    if (argc == 2)
+    {
+        usart2_txString("play sound: ");
+        usart2_txString(argv[1]);
+        usart2_txString("\r\n");
+
+        wav_playSound(argv[1]);
+    }
+}
+
+
+
 
 
 /////////////////////////////////////////////
@@ -161,5 +225,6 @@ void command_printHelp(void)
     }
 
 }
+
 
 

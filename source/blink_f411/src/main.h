@@ -22,6 +22,8 @@
 #include "sdcard_driver.h"
 #include "cli.h"
 #include "utility.h"
+#include "wav.h"
+
 
 #define RCC_PLLM_MASK    ((uint32_t)0x0000003F)
 #define RCC_PLLM_POS     0

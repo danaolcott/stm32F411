@@ -43,6 +43,7 @@
 									<listOptionValue builtIn="false" value="../sdcard"/>
 									<listOptionValue builtIn="false" value=".././commandline"/>
 									<listOptionValue builtIn="false" value=".././utility"/>
+									<listOptionValue builtIn="false" value=".././sound"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.interwork.477767351" name="Mix ARM/Thumb" superClass="com.atollic.truestudio.common_options.target.interwork"/>
 								<inputType id="com.atollic.truestudio.as.input.276012899" name="Input" superClass="com.atollic.truestudio.as.input"/>
@@ -64,6 +65,7 @@
 									<listOptionValue builtIn="false" value="../sdcard"/>
 									<listOptionValue builtIn="false" value=".././commandline"/>
 									<listOptionValue builtIn="false" value=".././utility"/>
+									<listOptionValue builtIn="false" value=".././sound"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.endianess.430891010" name="Endianess" superClass="com.atollic.truestudio.common_options.target.endianess"/>
 								<option id="com.atollic.truestudio.common_options.target.mcpu.2131891837" name="Microcontroller" superClass="com.atollic.truestudio.common_options.target.mcpu" value="STM32F411RE" valueType="enumerated"/>
@@ -158,6 +160,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="display"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="hardware"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="sdcard"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="sound"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="utility"/>
 					</sourceEntries>
@@ -208,6 +211,7 @@
 									<listOptionValue builtIn="false" value="../sdcard"/>
 									<listOptionValue builtIn="false" value=".././commandline"/>
 									<listOptionValue builtIn="false" value=".././utility"/>
+									<listOptionValue builtIn="false" value=".././sound"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.interwork.1275099041" name="Mix ARM/Thumb" superClass="com.atollic.truestudio.common_options.target.interwork"/>
 								<inputType id="com.atollic.truestudio.as.input.1203179825" name="Input" superClass="com.atollic.truestudio.as.input"/>
@@ -231,6 +235,7 @@
 									<listOptionValue builtIn="false" value="../sdcard"/>
 									<listOptionValue builtIn="false" value=".././commandline"/>
 									<listOptionValue builtIn="false" value=".././utility"/>
+									<listOptionValue builtIn="false" value=".././sound"/>
 								</option>
 								<option id="com.atollic.truestudio.common_options.target.endianess.1762156813" name="Endianess" superClass="com.atollic.truestudio.common_options.target.endianess"/>
 								<option id="com.atollic.truestudio.common_options.target.mcpu.864776136" name="Microcontroller" superClass="com.atollic.truestudio.common_options.target.mcpu" value="STM32F411RE" valueType="enumerated"/>
@@ -296,6 +301,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="bitmap"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="commandline"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="display"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="sound"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="utility"/>
 					</sourceEntries>

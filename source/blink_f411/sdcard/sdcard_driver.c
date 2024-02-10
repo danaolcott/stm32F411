@@ -761,6 +761,7 @@ int SD_PrintFileToBuffer(char* name, uint8_t* dest, uint32_t maxbytes)
 
         res = f_read(&fil, dest, maxbytes, &bytesRead);
 
+
         if (res != FR_OK)
         {
             f_close(&fil);

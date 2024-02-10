@@ -83,6 +83,7 @@
 #define DAC_Bit1_GPIO_Port GPIOB
 #define DAC_Bit2_Pin GPIO_Pin_15
 #define DAC_Bit2_GPIO_Port GPIOB
+#define DAC_GPIO_Port GPIOB
 
 
 
