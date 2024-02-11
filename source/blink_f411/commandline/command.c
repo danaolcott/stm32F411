@@ -105,31 +105,31 @@ static void cmdTimer2(int argc, char** argv)
 
     if (argc == 1)
     {
-        timer2_toggle();
+        usart2_txString("Timer2 on/off.... set # hz (10, 100, 1000, 8000\r\n");
     }
     else if (argc == 2)
     {
         if (!strcmp(argv[1], "on"))
             timer2_start();
-        else
+        else if (!strcmp(argv[1], "off"))
             timer2_stop();
+        else
+            usart2_txString("Invalid or missing params (set #)\r\n");
     }
     else if (argc == 3)
     {
-        //reset the timer based on arg2, values in khz
-        //timer2 set 11  - resets the timer to 11khz
+        //reset the timer based on arg2, values in hz
+        //timer2 set 1000  - resets the timer to 1khz
         if (!strcmp(argv[1], "set"))
         {
-            if (!strcmp(argv[2], "1"))
+            if (!strcmp(argv[2], "10"))
+                timer2_init(TIMER_SPEED_10HZ);
+            else if (!strcmp(argv[2], "100"))
+                timer2_init(TIMER_SPEED_100HZ);
+            else if (!strcmp(argv[2], "1000"))
                 timer2_init(TIMER_SPEED_1KHZ);
-            else if (!strcmp(argv[2], "8"))
+            else if (!strcmp(argv[2], "8000"))
                 timer2_init(TIMER_SPEED_8KHZ);
-            else if (!strcmp(argv[2], "11"))
-                timer2_init(TIMER_SPEED_11KHZ);
-            else if (!strcmp(argv[2], "22"))
-                timer2_init(TIMER_SPEED_22KHZ);
-            else if (!strcmp(argv[2], "44"))
-                timer2_init(TIMER_SPEED_44KHZ);
             else
             {
                 usart2_txString("Invalid Timer value");
@@ -223,7 +223,6 @@ void command_printHelp(void)
 
         i++;
     }
-
 }
 
 

@@ -13,10 +13,7 @@ typedef enum
     TIMER_SPEED_10HZ,
     TIMER_SPEED_100HZ,
     TIMER_SPEED_1KHZ,
-    TIMER_SPEED_8KHZ,
-    TIMER_SPEED_11KHZ,
-    TIMER_SPEED_22KHZ,
-    TIMER_SPEED_44KHZ
+    TIMER_SPEED_8KHZ
 }Timer_Speed;
 
 extern volatile uint32_t gTimer2Counter;

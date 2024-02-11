@@ -35,7 +35,7 @@ SOFTWARE.
 #include "main.h"
 
 
-
+void dummy_delay(volatile uint32_t time);
 
 ///////////////////////////////////////////
 //globals
@@ -46,20 +46,12 @@ int size = 0;
 
 int main(void)
 {
-    //configure the system clock
-    //SystemClockConfig(uint32_t PLL_M, uint32_t PLL_N, uint32_t PLL_P, uint32_t PLL_Q);
-    //to get the max speed:  system clock 100 mhz, ahpb, apb buses, 50mhz
-    //use the following
-    //m = 16 - match the hsi clock speed
-    //n = 400
-    //P = 4 - this divides it back down to get to 100mhz
-    //Q = 4??  this is another divider for the peripheral clocks
-    //default values
-//    SystemClockConfig(16, 192, 2, 4);
-    //this is recommended
-//    SystemClockConfig(16, 400, 4, 4);
+    //Configure the system clock as default values
+    //with the PLL on using HSI clock.  Results
+    //in system core clock running at 96mhz
+    //peripheral bus speeds at 48mhz
+    SystemClockConfig();
 
-    //Configure the systick with interrupts, HSI = 16Mhz
     if (SysTick_Config(SystemCoreClock / 1000))
     {
         while (1);
@@ -68,7 +60,7 @@ int main(void)
     //configure the hardware
     gpio_init();
     gpio_button_init();
-    adc_init();         //pa1 - adc1 ch1 - need to configure PA1 as alternate function
+    adc_init();
     usart2_init();
     spi1_init();
     timer2_init(TIMER_SPEED_8KHZ);
@@ -166,64 +158,64 @@ void TimingDelay_Decrement(void)
 
 /////////////////////////////////////////////////
 //Configures the system core clock to run with the
-//PLL.
-
-//default M = 16
-//default P = 2
-//default N - bits 13 and 12 are high - default is 192
-//default Q = 4
-
-void SystemClockConfig(uint32_t PLL_M, uint32_t PLL_N, uint32_t PLL_P, uint32_t PLL_Q)
+//PLL using default M, N, P, Q values.  Results
+//in System core clock = 96mhz
+//
+//Uses the following prescalers:
+//AHB Prescaler 1
+//APB1 Prescaler 4
+//APB2 Prescaler 2
+//
+void SystemClockConfig()
 {
-
-    //From the HAL libs.....  things that I might be missing...
-    //NOTE Need to turn on the clocks for the power source for the PLL??
-    //SET_BIT(RCC->APB1ENR, RCC_APB1ENR_PWREN);\
-
-    //  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-
-//    define __HAL_PWR_VOLTAGESCALING_CONFIG(__REGULATOR__) do {                                                     \
-//                                                                __IO uint32_t tmpreg = 0x00U;                        \
-//                                                                MODIFY_REG(PWR->CR, PWR_CR_VOS, (__REGULATOR__));   \
-//                                                                /* Delay after an RCC peripheral clock enabling */  \
-//                                                                tmpreg = READ_BIT(PWR->CR, PWR_CR_VOS);             \
-//                                                                UNUSED(tmpreg);                                     \
- //                                                             } while(0U)
-
-
-
-    volatile uint16_t timeout;
-
-    RCC_APB1PeriphClockCmd(RCC_APB1ENR_PWREN, ENABLE);   //power enable clocks??
+    //enable the power clock
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    waste_cpu(10);
 
+    //enable the HSI clock - this is default
+    RCC->CR |= RCC_CR_HSION;
+    while (!(RCC->CR & RCC_CR_HSIRDY));
 
-    RCC->CR |= RCC_CR_HSION;                            //enable the HSI clock
+    //set the HSI clock as the main clock
+    RCC->CFGR = (RCC->CFGR & ~(RCC_CFGR_SW)) | RCC_CFGR_SW_HSI;
 
-    timeout = 0xFFFF;
-    while (!(RCC->CR & RCC_CR_HSIRDY) && timeout--);    //wait until the HSI clock is ready
+    //make sure the PLL is off - this is default
+    RCC->CR &= ~RCC_CR_PLLON;
 
-    RCC->CFGR = (RCC->CFGR & ~(RCC_CFGR_SW)) | RCC_CFGR_SW_HSI;     //set HSI clock as the main clock
+    //set the power control register - VOS bits
+    //to max cpu speed < 100hz.  default is < 84mhz
+    PWR->CR |= PWR_CR_VOS;
+    waste_cpu(10);
 
-    RCC->CR &= ~RCC_CR_PLLON;           //make sure the PLL is off
+    //enable the PLL
+    RCC->CR |= RCC_CR_PLLON;
+    while (!(RCC->CR & RCC_CR_PLLRDY));
+    waste_cpu(10);
 
-    //load the PLL settings into the PLLCFG register
-//    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLM_MASK) | ((PLL_M << RCC_PLLM_POS) & RCC_PLLM_MASK);             //default value M = 16
-//    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLN_MASK) | ((PLL_N << RCC_PLLN_POS) & RCC_PLLN_MASK);             //default value N = 256?
-//    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLP_MASK) | ((((PLL_P >> 1) - 1) << RCC_PLLP_POS) & RCC_PLLP_MASK);
-//    RCC->PLLCFGR = (RCC->PLLCFGR & ~RCC_PLLQ_MASK) | ((PLL_Q << RCC_PLLQ_POS) & RCC_PLLQ_MASK);
+    //set the flash acr reg = 3 waitstates - reset value = 0x00
+    FLASH->ACR |= FLASH_ACR_LATENCY_3WS;
 
-    RCC->CR |= RCC_CR_PLLON;            //enable the PLL
-
-    //wait for the PLL to start
-    timeout = 0xFFFF;
-    while ((!(RCC->CR & RCC_CR_PLLRDY)) && timeout--);
+    //configure AHB/APB clocks - reset value for CFGR = 0x00
+    RCC->CFGR &= ~RCC_CFGR_HPRE_DIV1; //AHB Prescaler 1
+    RCC->CFGR |= RCC_CFGR_PPRE1_DIV4; //APB1 Prescaler 4
+    RCC->CFGR |= RCC_CFGR_PPRE2_DIV2; //APB2 Prescaler 2
 
     //set the PLL as the main clock
     RCC->CFGR = (RCC->CFGR & ~(RCC_CFGR_SW)) | RCC_CFGR_SW_PLL;
 
-    //update the system core clock
+    //wait while the PLL is used as the system clock
+    while ((RCC->CFGR & RCC_CFGR_SWS) != (RCC_CFGR_SWS_PLL));
+
+    //finally, update the system core clock.
+    //should read 96mhz where before it read as 16mhz
     SystemCoreClockUpdate();
 }
 
+
+void waste_cpu(uint32_t delay)
+{
+    volatile uint32_t temp = delay;
+    while (temp > 0)
+        temp--;
+}
 

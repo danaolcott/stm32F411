@@ -15,6 +15,12 @@ volatile uint32_t gTimer2Counter = 0;
 /////////////////////////////////////////////////
 //Configure Timer2 with interrupts
 //that trigger at the Timer_Speed
+//Base clock APB1 = 48mhz, systemclock = 96
+//
+//This should be apb1 = 24mhz, is there a multiplyer in
+//there somewhere??
+//i used a APB1 scaler of 4, should be 24mhz
+//but using a value of 48 matches the systick
 void timer2_init(Timer_Speed hz)
 {
     NVIC_InitTypeDef NVIC_InitStructure;                //for the interrupts
@@ -30,7 +36,7 @@ void timer2_init(Timer_Speed hz)
     NVIC_Init(&NVIC_InitStructure);
 
     //timebase configure
-    uint16_t PrescalerValue = (uint16_t)16 - 1;
+    uint16_t PrescalerValue = (uint16_t)48 - 1;
     uint16_t reloadValue = 999;
 
     //set the prescale and reload counter based
@@ -39,51 +45,32 @@ void timer2_init(Timer_Speed hz)
     {
         case TIMER_SPEED_10HZ:
         {
-            PrescalerValue = (uint16_t)32 - 1;
+            PrescalerValue = (uint16_t)96 - 1;
             reloadValue = 49999;
             break;
         }
         case TIMER_SPEED_100HZ:
         {
-            PrescalerValue = (uint16_t)16 - 1;
+            PrescalerValue = (uint16_t)48 - 1;
             reloadValue = 9999;
             break;
         }
         case TIMER_SPEED_1KHZ:
         {
-            PrescalerValue = (uint16_t)16 - 1;
+            PrescalerValue = (uint16_t)48 - 1;
             reloadValue = 999;
             break;
         }
         case TIMER_SPEED_8KHZ:
         {
-            PrescalerValue = (uint16_t)8 - 1;
-            reloadValue = 249;
+            PrescalerValue = (uint16_t)6 - 1;
+            reloadValue = 999;
             break;
         }
-        //Note:  Params for 11khz is not exact, it's about 0.2% off
-        //compared to the systick timer.
-        case TIMER_SPEED_11KHZ:
-        {
-            PrescalerValue = (uint16_t)4 - 1;
-            reloadValue = 363 - 1;
-            break;
-        }
-        case TIMER_SPEED_22KHZ:
-        {
-            PrescalerValue = (uint16_t)4 - 1;
-            reloadValue = 363 - 1;
-            break;
-        }
-        case TIMER_SPEED_44KHZ:
-        {
-            PrescalerValue = 1;
-            reloadValue = 800 - 1;
-            break;
-        }
+
         default:
         {
-            PrescalerValue = (uint16_t)16 - 1;
+            PrescalerValue = (uint16_t)48 - 1;
             reloadValue = 999;
             break;
         }
