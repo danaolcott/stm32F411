@@ -546,7 +546,7 @@ void FCLK_SLOW()
 //12mhz clock speed
 void FCLK_FAST()
 {
-    spi1_setSpeedHz(SPI_SPEED_1MHZ);
+    spi1_setSpeedHz(SPI_SPEED_12MHZ);
 }
 
 /////////////////////////////////

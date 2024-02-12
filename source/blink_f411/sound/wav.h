@@ -8,12 +8,14 @@
 #ifndef WAV_H_
 #define WAV_H_
 
-#define HEADER_SIZE         44
+#define WAV_HEADER_SIZE         44
+#define WAV_BUFFER_SIZE     512
+
 
 
 typedef struct
 {
-    uint8_t rawHeaderBuffer[HEADER_SIZE];
+    uint8_t rawHeaderBuffer[WAV_HEADER_SIZE];
 
     uint8_t chunkID[4];     //RIFF in ascii form
     uint32_t chunkSize;     //total file size - 8

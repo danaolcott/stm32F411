@@ -22,7 +22,7 @@
 #include <string.h>
 #include "main.h"
 #include "timer.h"
-#include "diskio.h"             //defines - CMD0
+#include "diskio.h"
 #include "ff.h"
 #include "sdcard_driver.h"
 #include "wav.h"
@@ -34,6 +34,11 @@ volatile static WavFileHeader gWavHeader;
 volatile static uint32_t gWavDataCounter = 0x00;
 volatile static uint32_t gWavBytesToRead = 0x00;
 volatile static uint8_t gWavSoundIsPlaying = 0x00;
+
+volatile static uint8_t gWavBuffer[WAV_BUFFER_SIZE];
+volatile static uint16_t gWavNumBuffersRemaining = 0;
+volatile static uint16_t gWavNumBytesInBufferRemaining = 0;
+
 volatile FIL wavFile;
 
 
@@ -45,22 +50,28 @@ void wav_init(void)
     gWavBytesToRead = 0x00;
     gWavSoundIsPlaying = 0x00;
 
-
+    memset((uint8_t*)gWavBuffer, 0x00, WAV_BUFFER_SIZE);
+    gWavNumBuffersRemaining = 0;
+    gWavNumBytesInBufferRemaining = 0;
 }
 
 
 /////////////////////////////////////////////////
 //loads a WavFileHeader structure with the contents
-//of the wav file header. returns the length of the databytes
+//of the wav file header. returns the size of the file.
+//Note:  The header is 44 bytes.  The data subchunk holds
+//a value for how many data bytes there are.  I didn't use
+//this value because sometimes after converting a file from
+//mp3 to wav, etc, that value was lost.  Therefore, when
+//when determining how many bytes to read, i just set it
+//to the file size - 44.
 uint32_t wav_readHeader(char* fileName, WavFileHeader *header)
 {
-
     //clear the header struct buffers
-    memset(header->rawHeaderBuffer, 0x00, HEADER_SIZE);
+    memset(header->rawHeaderBuffer, 0x00, WAV_HEADER_SIZE);
 
     //load the rawHeaderBuffer with info from the wav file
-
-    int result = SD_PrintFileToBuffer(fileName, header->rawHeaderBuffer, HEADER_SIZE);
+    int result = SD_PrintFileToBuffer(fileName, header->rawHeaderBuffer, WAV_HEADER_SIZE);
 
     //compute all the parameters in the header struct
     memcpy(header->chunkID, header->rawHeaderBuffer, 4);
@@ -99,19 +110,29 @@ uint32_t wav_readHeader(char* fileName, WavFileHeader *header)
 
 
 //////////////////////////////////////////////////////
-//play sound from file on sd card.  it's assumed
-//the file is type .wav, 8 bit sound, mono,
-//1 byte per sample.  playing at the rate of the timer
+//Play sound from file on sdcard.  The file should be
+//type .wav, 8 bit mono, sampled at 8000hz.  Timer2
+//should be configured to timeout at 8khz with interrupts.
 //
 int wav_playSound(char* filename)
 {
     FRESULT res;
+    unsigned int bytesRead;
 
     //open a file to get the header information
     gWavBytesToRead = wav_readHeader(filename, (WavFileHeader*)&gWavHeader);
-    gWavDataCounter = 0x00;
 
-    gWavSoundIsPlaying = 1;     //0x112846 =   1124422
+    gWavDataCounter = 0x00;     //reset the data counter
+
+    //compute number of buffers to read - discard the remainder
+    //to keep the math easy
+    gWavNumBuffersRemaining = (gWavBytesToRead / (uint16_t)WAV_BUFFER_SIZE);
+
+    memset((uint8_t*)gWavBuffer, 0x00, WAV_BUFFER_SIZE);  //clear the wav buffer
+
+    gWavNumBytesInBufferRemaining = WAV_BUFFER_SIZE;    //reset - down counter
+
+    gWavSoundIsPlaying = 1;     //see main loop, prevents the LCD from writing
 
     //reset the counters for comparing the speed of the interrupt
     gSysTickCounter = 0;
@@ -127,6 +148,13 @@ int wav_playSound(char* filename)
         return (-1*((int)res));
     }
 
+    //read the first buffer
+    res = f_read((FIL*)&wavFile, (uint8_t*)gWavBuffer, WAV_BUFFER_SIZE, &bytesRead);
+
+    gWavNumBuffersRemaining--;                          //counts down
+    gWavBytesToRead -= WAV_BUFFER_SIZE;                 //dec each time the SDcard is read
+    gWavNumBytesInBufferRemaining = WAV_BUFFER_SIZE;    //reset the buffer counter
+
     //start the timer
     timer2_start();
 
@@ -137,37 +165,45 @@ int wav_playSound(char* filename)
 ////////////////////////////////////////////////
 //Sound interrupt handler function.
 //Put this function call in a timer interrupt
-//handler that timesout at the sampling rate of the
+//handler that times out at the sampling rate of the
 //sound file.
 
 void wav_soundInterruptHandler(void)
 {
     FRESULT res;
-    volatile uint8_t soundData;
     unsigned int bytesRead;
 
     if (gWavSoundIsPlaying == 1)
     {
-        res = f_read((FIL*)&wavFile, (uint8_t*)&soundData, 1, &bytesRead);
-
-        //see if we can access the file data pointer here and
-        //just pass it to the set dac function
-
-        //write the data to the DAC....
-        wav_setDACOutput(soundData);
-
-        gWavBytesToRead-=bytesRead;
-        gWavDataCounter+=bytesRead;
-
-        if (gWavBytesToRead <= 8)
+        if (gWavBytesToRead > 2)                    //extra just in case
         {
-            //stop the timer... set a flag to be polled in main
-            gWavSoundIsPlaying = 0;
-            res = f_close((FIL*)&wavFile);
-
+            if (gWavNumBytesInBufferRemaining > 0)
+            {
+                wav_setDACOutput(gWavBuffer[WAV_BUFFER_SIZE - gWavNumBytesInBufferRemaining]);
+                gWavDataCounter++;
+                gWavNumBytesInBufferRemaining--;
+            }
+            else
+            {
+                if (gWavNumBuffersRemaining > 0)
+                {
+                    //load a new buffer full of data from the SDCARD
+                    //and decrement the number of buffers remaining
+                    res = f_read((FIL*)&wavFile, (uint8_t*)gWavBuffer, WAV_BUFFER_SIZE, &bytesRead);
+                    gWavBytesToRead-=bytesRead;         //bytes read from sdcard
+                    gWavNumBuffersRemaining--;                      //dec number buffers to read
+                    gWavNumBytesInBufferRemaining = WAV_BUFFER_SIZE;        //reset the buffer counter
+                }
+                else
+                {
+                    //its the last buffer and we're out of data to read
+                    gWavSoundIsPlaying = 0;
+                    res = f_close((FIL*)&wavFile);
+                    timer2_stop();
+                }
+            }
         }
     }
-
 }
 
 
@@ -180,42 +216,18 @@ uint8_t wav_getSoundPlayStatus(void)
 }
 
 
-//////////////////////////////////////////
+////////////////////////////////////////////
 //Writes "value" to the 5bit dac made from
-//the following resistor values:
-//Dump sound data to DAC bits
-//DAC_Bit0 - DAC_Bit4, located on the following
-//pins (should be all in the same row on the
-//Nucleo board:
+//5 resisters connected to the following pins:
 //PB13, PB14, PB15, PB1, PB2
 //capture the top 5 bits in value
 void wav_setDACOutput(uint8_t value)
 {
-    //read the value of port B and mask all the bits from the dac
-    //build the dac value
-    //add it to the masked value
-    //write to the port
-//#define DAC_Bit0_Pin GPIO_Pin_13
-//#define DAC_Bit1_Pin GPIO_Pin_14
-//#define DAC_Bit2_Pin GPIO_Pin_15
-//#define DAC_Bit3_Pin GPIO_Pin_1
-//#define DAC_Bit4_Pin GPIO_Pin_2
-
-    //mask - clear the bits associated with the dac
-    //  0001 1111 1111 1001 = 0x1FF9
-    //uint16_t DAC_MASK = 0x1FF9;
-
-//    uint16_t temp = GPIO_ReadOutputData(GPIOB);
- //   temp = temp & DAC_MASK;
-
-
     GPIO_WriteBit(DAC_Bit4_GPIO_Port, DAC_Bit4_Pin, ((value >> 7) & 0x01));
     GPIO_WriteBit(DAC_Bit3_GPIO_Port, DAC_Bit3_Pin, ((value >> 6) & 0x01));
     GPIO_WriteBit(DAC_Bit2_GPIO_Port, DAC_Bit2_Pin, ((value >> 5) & 0x01));
     GPIO_WriteBit(DAC_Bit1_GPIO_Port, DAC_Bit1_Pin, ((value >> 4) & 0x01));
     GPIO_WriteBit(DAC_Bit0_GPIO_Port, DAC_Bit0_Pin, ((value >> 3) & 0x01));
-
-
 }
 
 

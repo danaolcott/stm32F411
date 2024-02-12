@@ -15,8 +15,9 @@
 
 typedef enum
 {
-    SPI_SPEED_2MHZ,
-    SPI_SPEED_1MHZ,
+    SPI_SPEED_12MHZ,
+    SPI_SPEED_6MHZ,
+    SPI_SPEED_3MHZ,
     SPI_SPEED_400KHZ
 }SPI_Speed_t;
 

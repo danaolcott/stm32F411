@@ -38,7 +38,9 @@ the SD Card
 //#define SPI1_MISO_Pin GPIO_Pin_6
 //#define SPI1_MOSI_Pin GPIO_Pin_7
 //#define SPI1_GPIO_Port GPIOA
-
+//
+//Base speed for APB2 should be 48mhz.
+//based on prescale = 8, should run the spi at 6mhz
 void spi1_init(void)
 {
     GPIO_InitTypeDef  GPIO_InitStructure;
@@ -81,7 +83,7 @@ void spi1_init(void)
     SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;           //leading?  trailing
     SPI_InitStruct.SPI_NSS = SPI_NSS_Soft | SPI_NSSInternalSoft_Set;    //handle CS pin another way
 
-    SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+    SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;     //should put this at 6mhz
     SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;
 
     SPI_Init(SPI1, &SPI_InitStruct);
@@ -122,15 +124,26 @@ void spi1_setSpeedHz(SPI_Speed_t speed)
     SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;            //idle low?  high
     SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;           //leading?  trailing
     SPI_InitStruct.SPI_NSS = SPI_NSS_Soft | SPI_NSSInternalSoft_Set;    //handle CS pin another way
-    SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;
+    SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;     //should put this at 12mhz
     SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;
 
+    //values based on 16mhz clock - no pll
+//    switch(speed)
+//    {
+//        case SPI_SPEED_2MHZ:     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;        break;
+//        case SPI_SPEED_1MHZ:     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;       break;
+//        case SPI_SPEED_400KHZ:   SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;       break;
+//        default:                 SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;       break;
+//    }
+
+    //values based on 48mhz clock
     switch(speed)
     {
-        case SPI_SPEED_2MHZ:     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;        break;
-        case SPI_SPEED_1MHZ:     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;       break;
-        case SPI_SPEED_400KHZ:   SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_64;       break;
-        default:                 SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;       break;
+        case SPI_SPEED_12MHZ:     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4;        break;
+        case SPI_SPEED_6MHZ:     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;        break;
+        case SPI_SPEED_3MHZ:     SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;       break;
+        case SPI_SPEED_400KHZ:   SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_128;       break;
+        default:                 SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;       break;
     }
 
     SPI_Init(SPI1, &SPI_InitStruct);

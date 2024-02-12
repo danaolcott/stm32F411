@@ -15,18 +15,13 @@ volatile uint32_t gTimer2Counter = 0;
 /////////////////////////////////////////////////
 //Configure Timer2 with interrupts
 //that trigger at the Timer_Speed
-//Base clock APB1 = 48mhz, systemclock = 96
+//Timer2 is on APB1.
 //
-//This should be apb1 = 24mhz, is there a multiplyer in
-//there somewhere??
-//i used a APB1 scaler of 4, should be 24mhz
-//but using a value of 48 matches the systick
 void timer2_init(Timer_Speed hz)
 {
     NVIC_InitTypeDef NVIC_InitStructure;                //for the interrupts
     TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;     //timers
 
-    //Timer2 - Clock 16 mhz using no pll and HSI
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;

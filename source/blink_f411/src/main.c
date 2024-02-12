@@ -35,8 +35,6 @@ SOFTWARE.
 #include "main.h"
 
 
-void dummy_delay(volatile uint32_t time);
-
 ///////////////////////////////////////////
 //globals
 volatile uint32_t TimingDelay;
@@ -49,7 +47,7 @@ int main(void)
     //Configure the system clock as default values
     //with the PLL on using HSI clock.  Results
     //in system core clock running at 96mhz
-    //peripheral bus speeds at 48mhz
+    //peripheral bus speeds at 24mhz and 48mhz
     SystemClockConfig();
 
     if (SysTick_Config(SystemCoreClock / 1000))
