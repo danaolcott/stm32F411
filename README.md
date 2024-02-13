@@ -3,7 +3,7 @@ Projects using the STM32F411 Nucleo Board
 
 It started out as a simple blinking LED project and turned into something more complex.  The Nucleo board has headers that allow shields made for the Arduino to be used.  I decided to combine an LCD shield from DF Robot and an SDCard shield from SeedStudio (v3.1).  The LCD shield is pretty cool and has a 128x64 single pixel display, a user button, 5 position joystick, and an LED that is routed to the power supply.  The LCD is stacked on top of the SD Card shield.  Both of them use the same SPI interface pins and the 3.3v supply was not routed up through the SDCard shield.  To get them to all work together, I had to make a few modifications to each of the sheilds.
 
-![alt text](https://raw.githubusercontent.com/danaolcott/stm32F411/master/source/photos/f4114layers.jpg)
+![alt text](https://raw.githubusercontent.com/danaolcott/stm32F411/master/photos/f4114layers.jpg)
 
 Modifications to the LCD shield:
 - cut the header pin that connects to the reset signal.  Solder jumper wire from the cut header pin (shield button) to D2 (PA10).  This allows the button on the shield to be used as user button rather than a reset button.
