@@ -90,13 +90,6 @@ int main(void)
         LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
     }
 
-    //load the wav file from the sdcard and read the header
-    //into a buffer
-    WavFileHeader wavHeader;
-
-    wav_readHeader("RING.wav", &wavHeader);
-
-
 
     /* Infinite loop */
     while (1)

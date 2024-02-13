@@ -71,18 +71,28 @@ void gpio_init(void)
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
     //DAC output pins for sound
-    GPIO_InitStructure.GPIO_Pin =  DAC_Bit0_Pin | DAC_Bit1_Pin | DAC_Bit2_Pin | DAC_Bit3_Pin | DAC_Bit4_Pin;
+    //bit 0 is on port A, bits 1-6 is on port B
+    GPIO_InitStructure.GPIO_Pin =  DAC_Bit1_Pin | DAC_Bit2_Pin | DAC_Bit3_Pin | DAC_Bit4_Pin | DAC_Bit5_Pin | DAC_Bit6_Pin;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;            //configure for output
     GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
     GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
-    GPIO_Init(DAC_GPIO_Port, &GPIO_InitStructure);
+    GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+    //dac bit 0 is on port A, PA11
+    GPIO_InitStructure.GPIO_Pin =  DAC_Bit0_Pin;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;            //configure for output
+    GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;          //push pull
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz;       //max is 45mhz
+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;        //no pull
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     GPIO_ResetBits(GPIOA, GPIO_Pin_8);
     GPIO_ResetBits(GPIOA, GPIO_Pin_9);
     GPIO_ResetBits(GPIOC, GPIO_Pin_7);
     GPIO_ResetBits(GPIOB, GPIO_Pin_0);
-    GPIO_ResetBits(DAC_GPIO_Port, DAC_Bit0_Pin | DAC_Bit1_Pin | DAC_Bit2_Pin | DAC_Bit3_Pin | DAC_Bit4_Pin);
+    GPIO_ResetBits(GPIOB, DAC_Bit1_Pin | DAC_Bit2_Pin | DAC_Bit3_Pin | DAC_Bit4_Pin | DAC_Bit5_Pin);
+    GPIO_ResetBits(GPIOA, DAC_Bit0_Pin);
 }
 
 

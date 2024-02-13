@@ -73,7 +73,7 @@ void adc_init(void)
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)ADC1_DR_Address;
     DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&RawADCDataValues[0];
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
-    DMA_InitStructure.DMA_BufferSize = 1;                               //number of data units - ie, 1/2 word
+    DMA_InitStructure.DMA_BufferSize = 2;                               //number of data units - ie, 1/2 word
     DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;                //only 1 location to write to
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
@@ -81,7 +81,7 @@ void adc_init(void)
     DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
     DMA_InitStructure.DMA_Priority = DMA_Priority_High;
 
-    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+    DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
     DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
     DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
     DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
@@ -109,7 +109,7 @@ void adc_init(void)
     //initialize adc common init structure
     ADC_CommonStructInit(&ADC_CommonInitStructure);
     ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
-    ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div6;
+    ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div2;
     ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
     ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
     ADC_CommonInit(&ADC_CommonInitStructure);
@@ -192,6 +192,8 @@ void adc_interrupt_handler(void)
 
         //sets the enable bit on DMA2, stream0
         DMA_Cmd(DMA2_Stream0, ENABLE);
+
+        adc_init();
 
         adcOverRunError++;
     }

@@ -9,7 +9,7 @@
 #define WAV_H_
 
 #define WAV_HEADER_SIZE         44
-#define WAV_BUFFER_SIZE     512
+#define WAV_BUFFER_SIZE     2048
 
 
 

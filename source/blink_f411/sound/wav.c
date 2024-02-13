@@ -223,11 +223,13 @@ uint8_t wav_getSoundPlayStatus(void)
 //capture the top 5 bits in value
 void wav_setDACOutput(uint8_t value)
 {
-    GPIO_WriteBit(DAC_Bit4_GPIO_Port, DAC_Bit4_Pin, ((value >> 7) & 0x01));
-    GPIO_WriteBit(DAC_Bit3_GPIO_Port, DAC_Bit3_Pin, ((value >> 6) & 0x01));
-    GPIO_WriteBit(DAC_Bit2_GPIO_Port, DAC_Bit2_Pin, ((value >> 5) & 0x01));
-    GPIO_WriteBit(DAC_Bit1_GPIO_Port, DAC_Bit1_Pin, ((value >> 4) & 0x01));
-    GPIO_WriteBit(DAC_Bit0_GPIO_Port, DAC_Bit0_Pin, ((value >> 3) & 0x01));
+    GPIO_WriteBit(DAC_Bit6_GPIO_Port, DAC_Bit6_Pin, ((value >> 7) & 0x01));
+    GPIO_WriteBit(DAC_Bit5_GPIO_Port, DAC_Bit5_Pin, ((value >> 6) & 0x01));
+    GPIO_WriteBit(DAC_Bit4_GPIO_Port, DAC_Bit4_Pin, ((value >> 5) & 0x01));
+    GPIO_WriteBit(DAC_Bit3_GPIO_Port, DAC_Bit3_Pin, ((value >> 4) & 0x01));
+    GPIO_WriteBit(DAC_Bit2_GPIO_Port, DAC_Bit2_Pin, ((value >> 3) & 0x01));
+    GPIO_WriteBit(DAC_Bit1_GPIO_Port, DAC_Bit1_Pin, ((value >> 2) & 0x01));
+    GPIO_WriteBit(DAC_Bit0_GPIO_Port, DAC_Bit0_Pin, ((value >> 1) & 0x01));
 }
 
 

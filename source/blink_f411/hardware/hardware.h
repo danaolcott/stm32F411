@@ -73,18 +73,27 @@
 #define I2C1_GPIO_Port GPIOB
 
 //dac pins - 5 bit dac for sound
-#define DAC_Bit3_Pin GPIO_Pin_1
-#define DAC_Bit3_GPIO_Port GPIOB
-#define DAC_Bit4_Pin GPIO_Pin_2
-#define DAC_Bit4_GPIO_Port GPIOB
-#define DAC_Bit0_Pin GPIO_Pin_13
-#define DAC_Bit0_GPIO_Port GPIOB
-#define DAC_Bit1_Pin GPIO_Pin_14
-#define DAC_Bit1_GPIO_Port GPIOB
-#define DAC_Bit2_Pin GPIO_Pin_15
-#define DAC_Bit2_GPIO_Port GPIOB
-#define DAC_GPIO_Port GPIOB
+//add 2 more dac pins for 7 bit dac
+//PB12 - add 10k for bit -1
+//PA11 - add 20k for bit -2
+//adjust all the bit names up by 2
+//ie, make pb13 bit 2, make pb14 bit 3, etc.
 
+#define DAC_Bit5_Pin GPIO_Pin_1
+#define DAC_Bit5_GPIO_Port GPIOB
+#define DAC_Bit6_Pin GPIO_Pin_2
+#define DAC_Bit6_GPIO_Port GPIOB
+#define DAC_Bit2_Pin GPIO_Pin_13
+#define DAC_Bit2_GPIO_Port GPIOB
+#define DAC_Bit3_Pin GPIO_Pin_14
+#define DAC_Bit3_GPIO_Port GPIOB
+#define DAC_Bit4_Pin GPIO_Pin_15
+#define DAC_Bit4_GPIO_Port GPIOB
+
+#define DAC_Bit0_Pin GPIO_Pin_11
+#define DAC_Bit0_GPIO_Port GPIOA
+#define DAC_Bit1_Pin GPIO_Pin_12
+#define DAC_Bit1_GPIO_Port GPIOB
 
 
 //////////////////////////////////////////////
@@ -118,7 +127,8 @@
 //PA15 and PB7 - uart1 tx / rx
 //PA13 and PA14 - nothing....  no peripherals listed.
 
-
+//pa11 and pb12 - add 2 more resistors for 2 more dac bits
+//10k
 
 
 #endif /* HARDWARE_H_ */
