@@ -24,18 +24,20 @@ static void cmdADC(int argc, char** argv);
 static void cmdTimer2(int argc, char** argv);
 static void cmdPrintDir(int argc, char** argv);
 static void cmdPlaySound(int argc, char** argv);
+static void cmdFile(int argc, char** argv);
 
 ////////////////////////////////////////////
 //CommandStruct commandTable
 
-static const CommandStruct commandTable[7] =
+static const CommandStruct commandTable[8] =
 {
     {"?",       "Print Help",   cmdHelp},
     {"echo",    "echo args and num args", cmdEcho},
     {"adc",    "Register dump of adc1", cmdADC},
     {"timer2",    "Toggle Timer 2", cmdTimer2},
     {"dir",    "print sdcard dir", cmdPrintDir},
-    {"play",    "play sound (filename)", cmdPlaySound},
+    {"play",    "play sound (filename) or stop (stop)", cmdPlaySound},
+    {"file",    "delete name - deletes file name", cmdFile},
     {NULL, NULL, NULL},
 };
 
@@ -165,17 +167,51 @@ static void cmdPlaySound(int argc, char** argv)
     uint8_t length;
     if (argc == 2)
     {
-        usart2_txString("play sound: ");
-        usart2_txString(argv[1]);
-        usart2_txString("\r\n");
+        if (!strcmp(argv[1], "stop"))
+        {
+            usart2_txString("stop the current song\r\n");
+            wav_stopSound();
+        }
+        else
+        {
+            usart2_txString("play sound: ");
+            usart2_txString(argv[1]);
+            usart2_txString("\r\n");
 
-        wav_playSound(argv[1]);
+            wav_playSound(argv[1]);
+        }
     }
 }
 
 
 
+/////////////////////////////////////////////
+//Simple file commands
+//delete for now
+static void cmdFile(int argc, char** argv)
+{
+    FRESULT res;
 
+    if (argc == 3)
+    {
+        if (!strcmp(argv[1], "delete"))
+        {
+            usart2_txString("delete file: ");
+            usart2_txString(argv[2]);
+            usart2_txString("\r\n");
+
+            //delete the file and rebuild the directory
+            //returns the size of the new directory file
+            //less than 0 means an error
+            res = SD_FileDelete(argv[2]);
+            if (res > 0)
+                usart2_txString("File delete success\r\n");
+
+            else
+                usart2_txString("Error deleting the file\r\n");
+        }
+    }
+}
 
 /////////////////////////////////////////////
 //Command_ExeCommand

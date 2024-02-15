@@ -8,7 +8,7 @@
  *  and outputs the data to the dac.  All wav files should be
  *  converted to low definition, 8 bit mono, 8khz.
  *
- *  For this case, the dac is a 5 bit dac made with some resistors.
+ *  For this case, the dac is a 7 bit dac made with some resistors.
  *  The volume it pretty low for now, need to add an amplifier
  *
  *  See this website for converting:
@@ -129,11 +129,9 @@ int wav_playSound(char* filename)
     gWavNumBuffersRemaining = (gWavBytesToRead / (uint16_t)WAV_BUFFER_SIZE);
 
     memset((uint8_t*)gWavBuffer, 0x00, WAV_BUFFER_SIZE);  //clear the wav buffer
-
     gWavNumBytesInBufferRemaining = WAV_BUFFER_SIZE;    //reset - down counter
 
     gWavSoundIsPlaying = 1;     //see main loop, prevents the LCD from writing
-
     //reset the counters for comparing the speed of the interrupt
     gSysTickCounter = 0;
     gTimer2Counter = 0;
@@ -161,6 +159,23 @@ int wav_playSound(char* filename)
     return 0;
 }
 
+
+////////////////////////////////////////////////
+//stop the current file that is playing
+//stop the timer, clear the bytes remaining, etc
+//reset the buffers.  returns the neg value of
+//the FRESULT
+int wav_stopSound(void)
+{
+    FRESULT res;
+    timer2_stop();          //stop the interrupts
+    gWavSoundIsPlaying = 0;
+    gWavBytesToRead = 0;
+    gWavNumBuffersRemaining = 0;
+    res = f_close((FIL*)&wavFile);
+
+    return (-1*((int)res));
+}
 
 ////////////////////////////////////////////////
 //Sound interrupt handler function.

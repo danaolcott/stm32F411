@@ -64,6 +64,18 @@ int main(void)
     timer2_init(TIMER_SPEED_8KHZ);
     wav_init();
 
+    //test the playlist linked list
+    uint8_t length;
+    playList_Init();
+    length = playList_AddSong("PRINE1.WAV");
+    length = playList_AddSong("OZZY1.WAV");
+    length = playList_AddSong("REM1.WAV");
+
+
+
+
+
+
     LCD_Config();
     LCD_BacklightOn();
     LCD_Clear(0x00);
@@ -118,7 +130,7 @@ int main(void)
         //get the button status...
         if (buttonFlag == 1)
         {
-            wav_playSound("RING.WAV");
+            wav_playSound("PRINE1.WAV");
             buttonFlag = 0;
         }
 

@@ -89,9 +89,9 @@ void usart2_txByte(uint8_t data)
     while(!(USART2->SR & USART_SR_TC));
 }
 
-void usart2_txData(uint8_t *data, uint8_t length)
+void usart2_txData(uint8_t *data, uint16_t length)
 {
-    uint8_t i;
+    uint16_t i;
 
     for (i = 0 ; i < length ; i++)
         usart2_txByte(data[i]);
@@ -99,17 +99,17 @@ void usart2_txData(uint8_t *data, uint8_t length)
 
 void usart2_txString(const char* data)
 {
-    uint8_t length = strlen(data);
-    uint8_t i = 0;
+    uint16_t length = strlen(data);
+    uint16_t i = 0;
 
     for (i = 0 ; i < length ; i++)
         usart2_txByte(data[i]);
 }
 
 ///////////////////////////////////////////////
-void usart2_txStringLength(uint8_t* data, uint8_t length)
+void usart2_txStringLength(uint8_t* data, uint16_t length)
 {
-    uint8_t i = 0;
+    uint16_t i = 0;
 
     for (i = 0 ; i < length ; i++)
         usart2_txByte(data[i]);

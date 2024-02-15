@@ -130,5 +130,9 @@
 //pa11 and pb12 - add 2 more resistors for 2 more dac bits
 //10k
 
+//for the new board - add PA12 for 1 more dac bit for total of 8
+//
+
+
 
 #endif /* HARDWARE_H_ */

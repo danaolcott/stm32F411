@@ -12,15 +12,15 @@
 #include <stdint.h>
 #include "main.h"
 
-#define RX_BUFFER_SIZE    64
-#define TX_BUFFER_SIZE    64
+#define RX_BUFFER_SIZE    128
+#define TX_BUFFER_SIZE    128
 
 
 void usart2_init(void);
 void usart2_txByte(uint8_t data);
-void usart2_txData(uint8_t *data, uint8_t length);
+void usart2_txData(uint8_t *data, uint16_t length);
 void usart2_txString(const char* data);
-void usart2_txStringLength(uint8_t* data, uint8_t length);
+void usart2_txStringLength(uint8_t* data, uint16_t length);
 void usart2_echo(uint8_t *data, uint8_t length);
 
 void usart2_interrupt_handler(void);

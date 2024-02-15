@@ -8,7 +8,7 @@
 #ifndef WAV_H_
 #define WAV_H_
 
-#define WAV_HEADER_SIZE         44
+#define WAV_HEADER_SIZE     44
 #define WAV_BUFFER_SIZE     2048
 
 
@@ -32,15 +32,17 @@ typedef struct
 
 }WavFileHeader;
 
+
+
+
+
 void wav_init(void);
 uint32_t wav_readHeader(char* fileName, WavFileHeader *header);
 int wav_playSound(char* filename);
+int wav_stopSound(void);
 void wav_soundInterruptHandler(void);
 uint8_t wav_getSoundPlayStatus(void);
 void wav_setDACOutput(uint8_t value);
-
-
-
 
 
 #endif /* WAV_H_ */

@@ -23,7 +23,7 @@
 #include "cli.h"
 #include "utility.h"
 #include "wav.h"
-
+#include "playlist.h"
 
 
 extern volatile uint32_t TimingDelay;

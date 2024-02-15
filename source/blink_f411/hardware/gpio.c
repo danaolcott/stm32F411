@@ -91,7 +91,7 @@ void gpio_init(void)
     GPIO_ResetBits(GPIOA, GPIO_Pin_9);
     GPIO_ResetBits(GPIOC, GPIO_Pin_7);
     GPIO_ResetBits(GPIOB, GPIO_Pin_0);
-    GPIO_ResetBits(GPIOB, DAC_Bit1_Pin | DAC_Bit2_Pin | DAC_Bit3_Pin | DAC_Bit4_Pin | DAC_Bit5_Pin);
+    GPIO_ResetBits(GPIOB, DAC_Bit1_Pin | DAC_Bit2_Pin | DAC_Bit3_Pin | DAC_Bit4_Pin | DAC_Bit5_Pin | DAC_Bit6_Pin);
     GPIO_ResetBits(GPIOA, DAC_Bit0_Pin);
 }
 
