@@ -60,22 +60,13 @@ int main(void)
     gpio_button_init();
     adc_init();
     usart2_init();
+    usart1_init();
+
     spi1_init();
     timer2_init(TIMER_SPEED_8KHZ);
+    timer3_init(TIMER_SPEED_10HZ);
     wav_init();
-
-    //test the playlist linked list
-    uint8_t length;
     playList_Init();
-    length = playList_AddSong("PRINE1.WAV");
-    length = playList_AddSong("OZZY1.WAV");
-    length = playList_AddSong("REM1.WAV");
-
-
-
-
-
-
     LCD_Config();
     LCD_BacklightOn();
     LCD_Clear(0x00);
@@ -114,28 +105,25 @@ int main(void)
             LCD_DrawStringKern(0, 3, "Hell0 LCD");
 
             //output the adc from the dma buffer and the register directly
-            size = snprintf(buffer, 32, "ADC1: %d", adc_getValueFromDMA());
+            size = snprintf(buffer, 32, "ADC1: %d", adc_getValueFromTimerUpdate());
             LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
 
             size = snprintf(buffer, 32, "ADC-DR: %d", (uint16_t)ADC1->DR);
             LCD_DrawStringKernLength(3, 3, (uint8_t*)buffer, size);
 
-            size = snprintf(buffer, 32, "OverRun: %d", adc_getError());
-            LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
-
-            timer2_stop();
-            gpio_shieldLedToggle();
         }
 
-        //get the button status...
+        //get the button status... press a button
+        //play a song
         if (buttonFlag == 1)
         {
-            wav_playSound("PRINE1.WAV");
+            playList_playNextSong();
+
             buttonFlag = 0;
         }
 
-
-        Delay(1000);
+        gpio_shieldLedToggle();
+        Delay(500);
 
     }
 }

@@ -20,11 +20,20 @@ extern volatile uint32_t gTimer2Counter;
 
 /////////////////////////////////////////////
 //Timer2 configuration, start, stop, interrupt
+//used for output audio data
 void timer2_init(Timer_Speed hz);
 void timer2_start(void);
 void timer2_stop(void);
-void timer2_toggle(void);
 void timer2_interrupt_handler(void);
+
+
+///////////////////////////////////////////////
+//used for polling the adc joystick
+void timer3_init(Timer_Speed hz);
+void timer3_start(void);
+void timer3_stop(void);
+void timer3_interrupt_handler(void);
+
 
 
 

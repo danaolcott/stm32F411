@@ -31,7 +31,7 @@
 //#include "timer.h"       //for timeouts
 #include "diskio.h"             //defines - CMD0
 #include "ff.h"
-
+#include "playlist.h"       //for building a playlist of wav files
 
 //////////////////////////////////////////////
 //FatFs stuff - read/write buffers for sdcard
@@ -113,7 +113,7 @@ int SD_Init(void)
 
     if (res == FR_OK)
     {
-        //drive mounte - build the sd card directory file
+        //drive mount - build the sd card directory file
         //function returns the size of the directory
         //or the negative value of the error code
         //if something did not work.
@@ -211,6 +211,16 @@ int SD_BuildDirectory(char* name)
 				*s++ = 0x0D;		// \r
 				*s++ = 0x0A;		// \n
 				*s++ = 0;			// 0x00
+
+				////////////////////////////////////////////////////
+				//This is where we can compare char* fn and if contains
+				//.wav, if so, add it to the playlist
+				if (strstr(fn, ".WAV") != NULL)
+				{
+				    //add the fn to the playlist
+				    playList_AddSong(fn);
+				}
+
 
 
 				//back to writing to the dir.txt file....

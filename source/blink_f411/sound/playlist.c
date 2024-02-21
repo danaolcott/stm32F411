@@ -20,8 +20,10 @@
 #include "wav.h"
 
 PlayListItem gPlayList[20];
-PlayListItem *gPlayListHead;
-
+PlayListItem *gPlayListHead;            //head node - start of the playlist
+PlayListItem *gPlayListCurrentSong;     //pointer to the current song - init at the head
+PlayListItem *gPlayListNextSong;        //pointer the next song
+PlayListItem *gPlayListPreviousSong;    //pointer to the previous song
 
 ///////////////////////////////////
 //initializes a blank playlist
@@ -40,6 +42,9 @@ void playList_Init(void)
 
     //set the head node pointer
     gPlayListHead = &gPlayList[0];
+    gPlayListCurrentSong = gPlayListHead;
+    gPlayListNextSong = gPlayListHead;
+    gPlayListPreviousSong = gPlayListHead;
 
 }
 
@@ -127,6 +132,8 @@ uint8_t playList_AddSong(const char* name)
         strncpy(ptr->songName, name, SONG_MAX_LENGTH);
         ptr->next = NULL;
 
+        gPlayListNextSong = ptr;
+
         return 2;
     }
 
@@ -154,18 +161,240 @@ uint8_t playList_AddSong(const char* name)
 }
 
 
-void playList_RemoveSong(char* name)
+//////////////////////////////////////////////////
+//Remove a PlayListItem from the list.
+uint8_t playList_RemoveSong(const char* name)
 {
+    PlayListItem *ptr = gPlayListHead;
+    PlayListItem *next = gPlayListHead;
+    PlayListItem *prev = gPlayListHead;
 
+    uint8_t counter = 2;
+
+
+    //name is at the head - remove the head
+    if (!strcmp(ptr->songName, name))
+    {
+        if (ptr->next == NULL)
+        {
+            //clear the head node, etc. - it's a single item list
+            ptr->alive = 0;
+            memset(ptr->songName, 0x00, SONG_MAX_LENGTH);
+            return 0;
+        }
+
+        //there is at least 1 other node, so remove the
+        //head and update
+        prev = gPlayListHead;
+        gPlayListHead = gPlayListHead->next;
+
+        //remove the prev - free it up
+        prev->alive = 0;
+        prev->next = NULL;
+        memset(prev->songName, 0x00, SONG_MAX_LENGTH);
+
+        return 1;
+    }
+
+    //target node is somewhere in the middle or end of the list
+    //follow the until you find the name that matches
+    //assuming at least 3 elements
+    prev = gPlayListHead;
+    ptr = gPlayListHead->next;
+    next = ptr->next;
+
+    while (ptr->next != NULL)
+    {
+        if (!strcmp(ptr->songName, name))
+        {
+            //names match, remove the item.
+            //set prev->next = next
+            //clear the contents of ptr
+            prev->next = next;
+
+            ptr->alive = 0;
+            ptr->next = NULL;
+            memset(ptr->songName, 0x00, SONG_MAX_LENGTH);
+
+            return counter;
+
+        }
+
+        prev = ptr;
+        ptr = ptr->next;
+        next = ptr->next;
+
+        counter++;
+    }
+
+    //test the last item on the list
+    if (ptr->next == NULL)
+    {
+        if (!strcmp(ptr->songName, name))
+        {
+            prev->next = NULL;      //set the new tail of the list
+
+            ptr->alive = 0;
+            ptr->next = NULL;
+            memset(ptr->songName, 0x00, SONG_MAX_LENGTH);
+        }
+    }
+
+    return 0;
 }
 
-void playList_playNext(void)
-{
-
-}
-
+/////////////////////////////////////////////////////////
+//Prints the song list to a buffer of maxLength
+//returns the length of the string
 uint16_t playList_printSongList(uint8_t *buffer, uint16_t maxLength)
 {
+    PlayListItem *ptr = gPlayListHead;
+    uint16_t offset = 0;
+    memset(buffer, 0x00, maxLength);
 
+    while (ptr->next != NULL)
+    {
+        strncpy((char*)(buffer + offset), ptr->songName, maxLength - offset);
+        offset += strlen(ptr->songName);
+        strncpy((char*)(buffer + offset), "\r\n", maxLength - offset);
+        offset += strlen("\r\n");
+        ptr = ptr->next;
+    }
+
+    //finally, add the last song
+    strncpy((char*)(buffer + offset), ptr->songName, maxLength - offset);
+    offset += strlen(ptr->songName);
+    strncpy((char*)(buffer + offset), "\r\n", maxLength - offset);
+    offset += strlen("\r\n");
+
+    return offset;
+}
+
+
+PlayListItem* playList_getCurrentSong(void)
+{
+    return gPlayListCurrentSong;
+}
+
+PlayListItem* playList_getNextSong(void)
+{
+    return gPlayListNextSong;
+}
+
+PlayListItem* playList_getPreviousSong(void)
+{
+    return gPlayListPreviousSong;
+}
+
+
+
+
+////////////////////////////////////////////
+//skips to the next song in the playlist
+//returns a pointer to the new current song
+//advances the current, next, and previous
+//playlistitem pointers along the playlist
+PlayListItem* playList_skipSong(void)
+{
+    PlayListItem* ptr = gPlayListCurrentSong;
+
+    //not at the end of the list
+    if (ptr->next != NULL)
+    {
+        gPlayListPreviousSong = gPlayListCurrentSong;
+        gPlayListCurrentSong = ptr->next;
+        ptr = ptr->next;
+
+        if (ptr->next !=NULL)
+        {
+            gPlayListNextSong = ptr->next;
+        }
+        else
+        {
+            gPlayListNextSong = gPlayListHead;
+        }
+    }
+
+    //the current is at the end of the line
+    else
+    {
+        gPlayListPreviousSong = gPlayListCurrentSong;
+        gPlayListCurrentSong = gPlayListHead;
+        gPlayListNextSong = gPlayListHead->next;
+    }
+
+    return gPlayListCurrentSong;
+}
+
+
+void playList_playCurrentSong(void)
+{
+    if (wav_getSoundPlayStatus())
+    {
+        wav_stopSound();
+    }
+
+    wav_playSound(gPlayListCurrentSong->songName);
+}
+
+
+void playList_playNextSong(void)
+{
+    if (wav_getSoundPlayStatus())
+    {
+        wav_stopSound();
+    }
+
+    //increment the playlist
+    playList_skipSong();
+
+    //play the current
+    wav_playSound(gPlayListCurrentSong->songName);
+}
+
+
+
+
+void playList_stopCurrentSong(void)
+{
+    wav_stopSound();
+}
+
+void playList_pauseCurrentSong(void)
+{
+    wav_pauseSound();
+}
+
+void playList_resumeCurrentSong(void)
+{
+    wav_resumeSound();
+}
+
+
+///////////////////////////////////////
+//Checks to see if the song "name" is
+//on the playlist.  returns 0 if not
+//on the list.
+uint8_t playList_isValidSong(char* name)
+{
+    uint8_t valid = 0;
+
+    PlayListItem *ptr = gPlayListHead;
+
+    while (ptr->next != NULL)
+    {
+        //search for the instance where the name matches
+        //the song name and set valid = 1.
+        if (!strcmp(ptr->songName, name))
+            valid = 1;
+
+        ptr = ptr->next;
+    }
+
+    //final item - end of the list
+    if (!strcmp(ptr->songName, name))
+        valid = 1;
+
+    return valid;
 }
 

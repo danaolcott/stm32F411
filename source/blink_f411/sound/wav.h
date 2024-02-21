@@ -40,6 +40,8 @@ void wav_init(void);
 uint32_t wav_readHeader(char* fileName, WavFileHeader *header);
 int wav_playSound(char* filename);
 int wav_stopSound(void);
+void wav_pauseSound(void);
+void wav_resumeSound(void);
 void wav_soundInterruptHandler(void);
 uint8_t wav_getSoundPlayStatus(void);
 void wav_setDACOutput(uint8_t value);

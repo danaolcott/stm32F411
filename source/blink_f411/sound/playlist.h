@@ -17,7 +17,7 @@
 
 
 
-#define PLAYLIST_SIZE       20
+#define PLAYLIST_SIZE       48
 #define SONG_MAX_LENGTH     16
 
 //////////////////////////////////////////////////
@@ -40,11 +40,22 @@ uint8_t playList_getNumSongs(void);
 uint8_t playList_getFreeItem(void);
 
 uint8_t playList_AddSong(const char* name);
-void playList_RemoveSong(char* name);
-void playList_playNext(void);
+uint8_t playList_RemoveSong(const char* name);
+
 uint16_t playList_printSongList(uint8_t *buffer, uint16_t maxLength);
 
+PlayListItem* playList_getCurrentSong(void);
+PlayListItem* playList_getNextSong(void);
+PlayListItem* playList_getPreviousSong(void);
+PlayListItem* playList_skipSong(void);
 
+void playList_playCurrentSong(void);
+void playList_playNextSong(void);
+void playList_stopCurrentSong(void);
+void playList_pauseCurrentSong(void);
+void playList_resumeCurrentSong(void);
+
+uint8_t playList_isValidSong(char* name);
 
 
 #endif /* PLAYLIST_H_ */

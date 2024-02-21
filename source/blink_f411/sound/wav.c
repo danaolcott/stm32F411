@@ -8,8 +8,9 @@
  *  and outputs the data to the dac.  All wav files should be
  *  converted to low definition, 8 bit mono, 8khz.
  *
- *  For this case, the dac is a 7 bit dac made with some resistors.
- *  The volume it pretty low for now, need to add an amplifier
+ *  The DAC is constructed using resistors ranging from about 160ohm
+ *  to 22k ohm, where bits 0-7 ranging from high to low resistance
+ *  ie, bit 0 = 22k, bit 1 = 10k, ....  bit 7 = 160 ohm
  *
  *  See this website for converting:
  *  https://g711.org/
@@ -177,6 +178,22 @@ int wav_stopSound(void)
     return (-1*((int)res));
 }
 
+////////////////////////////////////////
+//pause the sound, leaves the file open
+//pauses the timer so no interrupts are generated
+void wav_pauseSound(void)
+{
+    timer2_stop();
+}
+
+////////////////////////////////////////
+//starts the timer
+void wav_resumeSound(void)
+{
+    timer2_start();
+}
+
+
 ////////////////////////////////////////////////
 //Sound interrupt handler function.
 //Put this function call in a timer interrupt
@@ -232,19 +249,48 @@ uint8_t wav_getSoundPlayStatus(void)
 
 
 ////////////////////////////////////////////
-//Writes "value" to the 5bit dac made from
-//5 resisters connected to the following pins:
-//PB13, PB14, PB15, PB1, PB2
-//capture the top 5 bits in value
+//Writes "value" to the 8 dac pins made using
+//a series of resistor values ranging from
+//about 160ohm to 22k ohm located on ports A and B.
+//See hardware.h for pin definitions for each bit
+//
 void wav_setDACOutput(uint8_t value)
 {
-    GPIO_WriteBit(DAC_Bit6_GPIO_Port, DAC_Bit6_Pin, ((value >> 7) & 0x01));
-    GPIO_WriteBit(DAC_Bit5_GPIO_Port, DAC_Bit5_Pin, ((value >> 6) & 0x01));
-    GPIO_WriteBit(DAC_Bit4_GPIO_Port, DAC_Bit4_Pin, ((value >> 5) & 0x01));
-    GPIO_WriteBit(DAC_Bit3_GPIO_Port, DAC_Bit3_Pin, ((value >> 4) & 0x01));
-    GPIO_WriteBit(DAC_Bit2_GPIO_Port, DAC_Bit2_Pin, ((value >> 3) & 0x01));
-    GPIO_WriteBit(DAC_Bit1_GPIO_Port, DAC_Bit1_Pin, ((value >> 2) & 0x01));
-    GPIO_WriteBit(DAC_Bit0_GPIO_Port, DAC_Bit0_Pin, ((value >> 1) & 0x01));
+    uint16_t portA = GPIO_ReadOutputData(GPIOA);
+    uint16_t portB = GPIO_ReadOutputData(GPIOB);
+
+    portA = portA & 0xE7FF;     //clear the dac bits on portA
+    portB = portB & 0x0FF9;     //clear the dac bits on portB
+
+    //portA - bits 7 and 6
+    portA |= ((value >> 6) & 0x01) << 11;
+    portA |= ((value >> 7) & 0x01) << 12;
+
+    //portB - bits 5 to 0
+    portB |= ((value >> 5) & 0x01) << 12;
+    portB |= ((value >> 4) & 0x01) << 2;
+    portB |= ((value >> 3) & 0x01) << 1;
+    portB |= ((value >> 2) & 0x01) << 15;
+    portB |= ((value >> 1) & 0x01) << 14;
+    portB |= ((value >> 0) & 0x01) << 13;
+
+    //write the values back to ports A and B
+    GPIO_Write(GPIOA, portA);
+    GPIO_Write(GPIOB, portB);
+
+////////////////////////////////////////////////
+//The following is same as above, but using more
+//register writes.
+//
+//    GPIO_WriteBit(DAC_Bit7_GPIO_Port, DAC_Bit7_Pin, ((value >> 7) & 0x01));
+//    GPIO_WriteBit(DAC_Bit6_GPIO_Port, DAC_Bit6_Pin, ((value >> 6) & 0x01));
+//    GPIO_WriteBit(DAC_Bit5_GPIO_Port, DAC_Bit5_Pin, ((value >> 5) & 0x01));
+//    GPIO_WriteBit(DAC_Bit4_GPIO_Port, DAC_Bit4_Pin, ((value >> 4) & 0x01));
+//    GPIO_WriteBit(DAC_Bit3_GPIO_Port, DAC_Bit3_Pin, ((value >> 3) & 0x01));
+//    GPIO_WriteBit(DAC_Bit2_GPIO_Port, DAC_Bit2_Pin, ((value >> 2) & 0x01));
+//    GPIO_WriteBit(DAC_Bit1_GPIO_Port, DAC_Bit1_Pin, ((value >> 1) & 0x01));
+//    GPIO_WriteBit(DAC_Bit0_GPIO_Port, DAC_Bit0_Pin, ((value >> 0) & 0x01));
+
 }
 
 

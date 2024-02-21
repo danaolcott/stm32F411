@@ -35,7 +35,6 @@
 #include "gpio.h"
 #include "usart.h"
 #include "sdcard_driver.h"
-#include "adc.h"
 #include "timer.h"
 
 volatile uint32_t gSysTickCounter = 0;
@@ -176,6 +175,15 @@ void EXTI15_10_IRQHandler(void)
     gpio_button_handler();
 }
 
+/////////////////////////////////////////
+//usart1 interrupt handler - maybe put this
+//function def in uart.c??
+void USART1_IRQHandler(void)
+{
+    usart1_interrupt_handler();
+}
+
+
 
 /////////////////////////////////////////
 //uart2 interrupt handler - maybe put this
@@ -186,16 +194,16 @@ void USART2_IRQHandler(void)
 }
 
 
-///////////////////////////////////////
-void ADC_IRQHandler(void)
-{
-    adc_interrupt_handler();
-}
-
 void TIM2_IRQHandler(void)
 {
     timer2_interrupt_handler();
 }
+
+void TIM3_IRQHandler(void)
+{
+    timer3_interrupt_handler();
+}
+
 /**
   * @brief  This function handles PPP interrupt request.
   * @param  None
