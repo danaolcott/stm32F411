@@ -15,10 +15,9 @@
 #include <stdint.h>
 #include <string.h>
 
-
-
 #define PLAYLIST_SIZE       48
 #define SONG_MAX_LENGTH     16
+
 
 //////////////////////////////////////////////////
 //PlayList - Contains a list of songs on the SDCard
@@ -32,6 +31,13 @@ struct playlistItem
 
 typedef struct playlistItem PlayListItem;
 
+
+////////////////////////////////////////
+typedef enum
+{
+    PLAY_MODE_SINGLE,
+    PLAY_MODE_CONTINUOUS
+}PlayMode;
 
 
 
@@ -56,6 +62,12 @@ void playList_pauseCurrentSong(void);
 void playList_resumeCurrentSong(void);
 
 uint8_t playList_isValidSong(char* name);
+
+void playList_setPlayMode(PlayMode MODE);
+PlayMode playList_getPlayMode(void);
+PlayMode playList_TogglePlayMode(void);
+
+void playList_displayUpdate(void);
 
 
 #endif /* PLAYLIST_H_ */

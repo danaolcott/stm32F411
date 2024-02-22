@@ -79,7 +79,7 @@ void timer2_init(Timer_Speed hz)
 
     //start the timer and enable interrupts
     //or use the timer2_start / stop functions
-    TIM_Cmd(TIM2, ENABLE);
+//    TIM_Cmd(TIM2, ENABLE);
 
     //Configure Timer7 overflow interrupt
     TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);
@@ -133,7 +133,7 @@ void timer3_init(Timer_Speed hz)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
     NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
@@ -187,7 +187,7 @@ void timer3_init(Timer_Speed hz)
 
     //start the timer and enable interrupts
     //or use the timer2_start / stop functions
-    TIM_Cmd(TIM3, ENABLE);
+//    TIM_Cmd(TIM3, ENABLE);
 
     //Configure Timer3 overflow interrupt
     TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
@@ -216,10 +216,10 @@ void timer3_interrupt_handler(void)
         TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 
         //update the joystick value from adc-dr
-        ADC_GetConversionValue(ADC1);
+        //ADC_GetConversionValue(ADC1);
 
         //restart the conversion
-        ADC_SoftwareStartConv(ADC1);
+        //ADC_SoftwareStartConv(ADC1);
 
         //do something here
         gTimer3Counter++;

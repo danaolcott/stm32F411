@@ -101,23 +101,62 @@ int main(void)
         //the file.
         if (!wav_getSoundPlayStatus())
         {
-            LCD_Clear(0x00);
-            LCD_DrawStringKern(0, 3, "Hell0 LCD");
 
-            //output the adc from the dma buffer and the register directly
-            size = snprintf(buffer, 32, "ADC1: %d", adc_getValueFromTimerUpdate());
-            LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
+            //read the joystick value;
+            JoystickPosition_t position = Joystick_GetPosition();
 
-            size = snprintf(buffer, 32, "ADC-DR: %d", (uint16_t)ADC1->DR);
-            LCD_DrawStringKernLength(3, 3, (uint8_t*)buffer, size);
+            if ((position == JOYSTICK_DOWN) || (position == JOYSTICK_UP))
+            {
+                //indexes down the playlist
+                playList_skipSong();
+            }
+
+            if ((position == JOYSTICK_LEFT) || (position == JOYSTICK_RIGHT))
+            {
+                playList_playCurrentSong();
+            }
+
+            if (position == JOYSTICK_PRESS)
+            {
+                playList_TogglePlayMode();
+            }
+
+            //update the display
+            playList_displayUpdate();
+
+        }
+
+        //check the mode and if a song is playing
+        //if continuous, and no song playing, play
+        //the next one.
+        if (!wav_getSoundPlayStatus() && (playList_getPlayMode() == PLAY_MODE_CONTINUOUS))
+        {
+            Delay(1000);
+
+            playList_skipSong();
+
+            //update the display
+            playList_displayUpdate();
+
+            playList_playCurrentSong();
 
         }
 
         //get the button status... press a button
-        //play a song
+        //button press while the song is playing or not....
+        //if playing, stop playing, delay, increment song
+        //play current song.
         if (buttonFlag == 1)
         {
-            playList_playNextSong();
+            if (!wav_getSoundPlayStatus())
+                wav_stopSound();
+
+            Delay(1000);
+
+            playList_skipSong();
+            playList_displayUpdate();
+            Delay(1000);
+            playList_playCurrentSong();
 
             buttonFlag = 0;
         }

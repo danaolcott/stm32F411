@@ -24,7 +24,7 @@
 #include "utility.h"
 #include "wav.h"
 #include "playlist.h"
-
+#include "joystick.h"
 
 extern volatile uint32_t TimingDelay;
 void Delay(volatile uint32_t timeTick);

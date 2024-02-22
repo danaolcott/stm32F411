@@ -84,6 +84,13 @@ void adc_init(void)
 
     ADC_Cmd(ADC1, ENABLE);
 
+    //update the joystick value from adc-dr
+    ADC_GetConversionValue(ADC1);
+
+    //restart the conversion
+    ADC_SoftwareStartConv(ADC1);
+
+
 }
 
 

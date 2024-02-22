@@ -18,6 +18,7 @@
 
 #include "playlist.h"
 #include "wav.h"
+#include "lcd_12864_dfrobot.h"
 
 PlayListItem gPlayList[20];
 PlayListItem *gPlayListHead;            //head node - start of the playlist
@@ -25,12 +26,16 @@ PlayListItem *gPlayListCurrentSong;     //pointer to the current song - init at 
 PlayListItem *gPlayListNextSong;        //pointer the next song
 PlayListItem *gPlayListPreviousSong;    //pointer to the previous song
 
+volatile static PlayMode gPlayListMode = PLAY_MODE_SINGLE;        //set to 1 if continuous, 0 for single play
+
 ///////////////////////////////////
 //initializes a blank playlist
 //with the head pointing at the
 //first index
 void playList_Init(void)
 {
+    gPlayListMode = PLAY_MODE_SINGLE;
+
     uint8_t i = 0;
     for (i = 0 ; i < PLAYLIST_SIZE ; i++)
     {
@@ -107,7 +112,7 @@ uint8_t playList_AddSong(const char* name)
 {
     //check for an empty playlist
     PlayListItem *ptr = gPlayListHead;
-    uint8_t index, i = 0;
+    uint8_t index;
     uint8_t length = 2;
 
     if (!(ptr->alive))
@@ -397,4 +402,57 @@ uint8_t playList_isValidSong(char* name)
 
     return valid;
 }
+
+////////////////////////////////////////////////
+void playList_setPlayMode(PlayMode MODE)
+{
+    gPlayListMode = MODE;
+}
+
+////////////////////////////////////////////////
+PlayMode playList_getPlayMode(void)
+{
+    return gPlayListMode;
+}
+
+////////////////////////////////////////////////
+PlayMode playList_TogglePlayMode(void)
+{
+    if (gPlayListMode == PLAY_MODE_SINGLE)
+        gPlayListMode = PLAY_MODE_CONTINUOUS;
+    else
+        gPlayListMode = PLAY_MODE_SINGLE;
+
+    return gPlayListMode;
+}
+
+
+
+///////////////////////////////////////////////
+//LCD Display update in between songs.
+//
+void playList_displayUpdate(void)
+{
+    uint8_t size;
+    uint8_t buffer[32];
+
+    LCD_Clear(0x00);
+
+    if (gPlayListMode == PLAY_MODE_SINGLE)
+        LCD_DrawStringKern(0, 3, "Single");
+    else
+        LCD_DrawStringKern(0, 3, "Continuous");
+
+    size = snprintf(buffer, 32, ":: %s", gPlayListPreviousSong->songName);
+    LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
+
+    size = snprintf(buffer, 32, "::>> %s", gPlayListCurrentSong->songName);
+    LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
+
+    size = snprintf(buffer, 32, ":: %s", gPlayListNextSong->songName);
+    LCD_DrawStringKernLength(6, 3, (uint8_t*)buffer, size);
+}
+
+
+
 
