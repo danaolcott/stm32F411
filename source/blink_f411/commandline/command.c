@@ -311,7 +311,6 @@ static void cmdPlaySound(int argc, char** argv)
             usart1_txString("\r\n");
 
             playList_resumeCurrentSong();
-
         }
 
         else if (!strcmp(argv[1], "print"))
@@ -338,6 +337,15 @@ static void cmdPlaySound(int argc, char** argv)
             usart2_txString(playItem->songName);
             usart2_txString("\r\n\r\n");
 
+        }
+
+        else if (!strcmp(argv[1], "mode"))
+        {
+            usart2_txString("Play Mode: ");
+            if (playList_getPlayMode() == PLAY_MODE_SINGLE)
+                usart2_txString("Single\r\n");
+            else
+                usart2_txString("Continuous\r\n");
         }
 
         else
@@ -398,6 +406,31 @@ static void cmdPlaySound(int argc, char** argv)
                 usart2_txString("Invalid Title (case-sensitive): ");
                 usart2_txString(argv[2]);
                 usart2_txString("\r\n");
+            }
+        }
+
+        ///////////////////////////////////////////
+        //set the play mode to single or continuous
+        else if (!strcmp(argv[1], "mode"))
+        {
+            if (!strcmp(argv[2], "single"))
+            {
+                usart2_txString("Set Play Mode: Single\r\n");
+                playList_setPlayMode(PLAY_MODE_SINGLE);
+            }
+            else if (!strcmp(argv[2], "continuous"))
+            {
+                usart2_txString("Set Play Mode: Continuous\r\n");
+                playList_setPlayMode(PLAY_MODE_CONTINUOUS);
+            }
+            else if (!strcmp(argv[2], "cont"))
+            {
+                usart2_txString("Set Play Mode: Continuous\r\n");
+                playList_setPlayMode(PLAY_MODE_CONTINUOUS);
+            }
+            else
+            {
+                usart2_txString("Wrong input, play mode (single/continuous/cont)\r\n");
             }
         }
 

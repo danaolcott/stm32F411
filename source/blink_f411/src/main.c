@@ -93,6 +93,7 @@ int main(void)
         LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
     }
 
+    Delay(2000);
 
     /* Infinite loop */
     while (1)
@@ -101,7 +102,6 @@ int main(void)
         //the file.
         if (!wav_getSoundPlayStatus())
         {
-
             //read the joystick value;
             JoystickPosition_t position = Joystick_GetPosition();
 
@@ -148,8 +148,8 @@ int main(void)
         //play current song.
         if (buttonFlag == 1)
         {
-            if (!wav_getSoundPlayStatus())
-                wav_stopSound();
+            if (wav_getSoundPlayStatus())
+                playList_stopCurrentSong();
 
             Delay(1000);
 

@@ -20,7 +20,7 @@
 #include "wav.h"
 #include "lcd_12864_dfrobot.h"
 
-PlayListItem gPlayList[20];
+PlayListItem gPlayList[PLAYLIST_SIZE];
 PlayListItem *gPlayListHead;            //head node - start of the playlist
 PlayListItem *gPlayListCurrentSong;     //pointer to the current song - init at the head
 PlayListItem *gPlayListNextSong;        //pointer the next song
@@ -443,13 +443,13 @@ void playList_displayUpdate(void)
     else
         LCD_DrawStringKern(0, 3, "Continuous");
 
-    size = snprintf(buffer, 32, ":: %s", gPlayListPreviousSong->songName);
+    size = snprintf(buffer, 32, "  %s", gPlayListPreviousSong->songName);
     LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
 
-    size = snprintf(buffer, 32, "::>> %s", gPlayListCurrentSong->songName);
+    size = snprintf(buffer, 32, ":>> %s", gPlayListCurrentSong->songName);
     LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
 
-    size = snprintf(buffer, 32, ":: %s", gPlayListNextSong->songName);
+    size = snprintf(buffer, 32, "  %s", gPlayListNextSong->songName);
     LCD_DrawStringKernLength(6, 3, (uint8_t*)buffer, size);
 }
 
