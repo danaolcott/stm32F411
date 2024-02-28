@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#define PLAYLIST_SIZE       48
+#define PLAYLIST_SIZE       128
 #define SONG_MAX_LENGTH     16
 
 
@@ -36,6 +36,7 @@ typedef struct playlistItem PlayListItem;
 typedef enum
 {
     PLAY_MODE_SINGLE,
+    PLAY_MODE_RANDOM,
     PLAY_MODE_CONTINUOUS
 }PlayMode;
 
@@ -60,6 +61,10 @@ void playList_playNextSong(void);
 void playList_stopCurrentSong(void);
 void playList_pauseCurrentSong(void);
 void playList_resumeCurrentSong(void);
+
+PlayListItem* playList_setRandomSong(void);
+PlayListItem* playList_getRandomSong(void);
+void playList_playRandomSong(void);
 
 uint8_t playList_isValidSong(char* name);
 

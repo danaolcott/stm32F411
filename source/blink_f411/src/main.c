@@ -95,40 +95,54 @@ int main(void)
 
     Delay(2000);
 
+    playList_displayUpdate();
+
     /* Infinite loop */
     while (1)
     {
-        //only do something with the LCD if not accessing
-        //the file.
-        if (!wav_getSoundPlayStatus())
+        //read the joystick value;
+        JoystickPosition_t position = Joystick_GetPosition();
+
+        if ((position == JOYSTICK_DOWN) || (position == JOYSTICK_UP))
         {
-            //read the joystick value;
-            JoystickPosition_t position = Joystick_GetPosition();
+            //indexes down the playlist
+            playList_skipSong();
+        }
 
-            if ((position == JOYSTICK_DOWN) || (position == JOYSTICK_UP))
-            {
-                //indexes down the playlist
-                playList_skipSong();
-            }
+        if ((position == JOYSTICK_LEFT) || (position == JOYSTICK_RIGHT))
+        {
+            playList_playCurrentSong();
+        }
 
-            if ((position == JOYSTICK_LEFT) || (position == JOYSTICK_RIGHT))
-            {
-                playList_playCurrentSong();
-            }
+        if (position == JOYSTICK_PRESS)
+        {
+            //toggle the mode and update the display
+            playList_TogglePlayMode();
 
-            if (position == JOYSTICK_PRESS)
+            if (wav_getSoundPlayStatus())
             {
-                playList_TogglePlayMode();
+                wav_pauseSound();
+                playList_displayUpdate();
+                wav_resumeSound();
             }
+            else
+                playList_displayUpdate();
+        }
+
+        //play mode - random
+        if (!wav_getSoundPlayStatus() && (playList_getPlayMode() == PLAY_MODE_RANDOM))
+        {
+            Delay(1000);
+
+            playList_setRandomSong();
 
             //update the display
             playList_displayUpdate();
+            playList_playRandomSong();
 
         }
 
-        //check the mode and if a song is playing
-        //if continuous, and no song playing, play
-        //the next one.
+        //play mode - continuous
         if (!wav_getSoundPlayStatus() && (playList_getPlayMode() == PLAY_MODE_CONTINUOUS))
         {
             Delay(1000);
@@ -142,24 +156,36 @@ int main(void)
 
         }
 
-        //get the button status... press a button
-        //button press while the song is playing or not....
-        //if playing, stop playing, delay, increment song
-        //play current song.
+        //press the button to skip to the next song
         if (buttonFlag == 1)
         {
             if (wav_getSoundPlayStatus())
+            {
                 playList_stopCurrentSong();
+                Delay(1000);
 
-            Delay(1000);
+                if (playList_getPlayMode() == PLAY_MODE_RANDOM)
+                {
+                    playList_setRandomSong();
+                    playList_displayUpdate();
+                    Delay(1000);
+                    playList_playRandomSong();
+                }
 
-            playList_skipSong();
-            playList_displayUpdate();
-            Delay(1000);
-            playList_playCurrentSong();
+                else if (playList_getPlayMode() == PLAY_MODE_CONTINUOUS)
+                {
+                    playList_skipSong();
+                    playList_displayUpdate();
+                    Delay(1000);
+                    playList_playCurrentSong();
+                }
+            }
+
 
             buttonFlag = 0;
         }
+
+
 
         gpio_shieldLedToggle();
         Delay(500);

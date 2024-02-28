@@ -14,8 +14,8 @@
 #include "ff.h"         //FRESULT typdedefs
 //////////////////////////////////////////
 //Defines and externs
-#define SD_READ_BUFFER_SIZE    1024
-#define SD_WRITE_BUFFER_SIZE   1024
+#define SD_READ_BUFFER_SIZE    2048
+#define SD_WRITE_BUFFER_SIZE   2048
 
 extern uint8_t SD_readBuffer[SD_READ_BUFFER_SIZE];
 extern uint8_t SD_writeBuffer[SD_WRITE_BUFFER_SIZE];

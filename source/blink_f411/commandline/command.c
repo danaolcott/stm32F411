@@ -5,8 +5,8 @@
  *      Author: henry
  *
  *  Commandline commands for incoming data through the
- *  USB.  Some of the commands also route data to the
- *  bluetooth.
+ *  USB or bluetooth.  So far, most of the commands give
+ *  feedback to the usb.
  */
 
 
@@ -37,13 +37,13 @@ static void cmdFile(int argc, char** argv);
 static const CommandStruct commandTable[9] =
 {
     {"?",       "Print Help",   cmdHelp},
-    {"echo",    "echo args and num args", cmdEcho},
-    {"adc",    "Register dump of adc1", cmdADC},
-    {"timer2",    "Toggle Timer 2", cmdTimer2},
+    {"echo",    "Echo Args and Num Args", cmdEcho},
+    {"adc",    "Register Dump - ADC1", cmdADC},
+    {"timer2",    "Timer2 on / off, set # hz", cmdTimer2},
     {"timer3",    "Timer3 on / off, set # hz", cmdTimer3},
-    {"dir",    "print sdcard dir", cmdPrintDir},
-    {"play",    "play current, skip, next, print, stop, pause, resume, remove, add", cmdPlaySound},
-    {"file",    "delete name - deletes file name", cmdFile},
+    {"dir",    "Print SDCard Directory", cmdPrintDir},
+    {"play",    "Play Current, Skip, Next, Print, Stop, Pause, Resume, Remove (Song), Add (Song)", cmdPlaySound},
+    {"file",    "Delete Name (Deletes File <name>)", cmdFile},
     {NULL, NULL, NULL},
 };
 
@@ -107,11 +107,9 @@ static void cmdADC(int argc, char** argv)
 
 ////////////////////////////////////////////
 //Timer2 - on / off, set # hz.
-//Controlls Timer2
+//Controls Timer2
 static void cmdTimer2(int argc, char** argv)
 {
-    usart2_txString("Toggle Timer\r\n");
-
     if (argc == 1)
     {
         usart2_txString("Timer2 on/off.... set # hz (10, 100, 1000, 8000\r\n");
@@ -122,8 +120,10 @@ static void cmdTimer2(int argc, char** argv)
             timer2_start();
         else if (!strcmp(argv[1], "off"))
             timer2_stop();
+        else if (!strcmp(argv[1], "set"))
+            usart2_txString("Missing parameter (freq hz)\r\n");
         else
-            usart2_txString("Invalid or missing params (set #)\r\n");
+            usart2_txString("Invalid Input\r\n");
     }
     else if (argc == 3)
     {
@@ -165,8 +165,10 @@ static void cmdTimer3(int argc, char** argv)
             timer3_start();
         else if (!strcmp(argv[1], "off"))
             timer3_stop();
+        else if (!strcmp(argv[1], "set"))
+            usart2_txString("Missing parameter (freq hz)\r\n");
         else
-            usart2_txString("Invalid or missing params (set #)\r\n");
+            usart2_txString("Invalid Input\r\n");
     }
     else if (argc == 3)
     {
@@ -208,6 +210,11 @@ static void cmdPrintDir(int argc, char** argv)
     usart2_txStringLength(SD_writeBuffer, length);
     usart2_txString("r\n");
 
+    //bluetooth
+    usart1_txString("Contents of the sdcard:r\n");
+    usart1_txStringLength(SD_writeBuffer, length);
+    usart1_txString("r\n");
+
 }
 
 /////////////////////////////////////////////////
@@ -245,20 +252,39 @@ static void cmdPlaySound(int argc, char** argv)
 
         }
 
+        //next - depending on the play mode
         else if (!strcmp(argv[1], "next"))
         {
-            usart2_txString("Play Next Song: ");
-            playItem = playList_getNextSong();
-            usart2_txString(playItem->songName);
-            usart2_txString("\r\n");
+            if (playList_getPlayMode() == PLAY_MODE_RANDOM)
+            {
+                usart2_txString("Random Next Song: ");
+                playItem = playList_setRandomSong();
+                usart2_txString(playItem->songName);
+                usart2_txString("\r\n");
 
-            //bluetooth
-            usart1_txString("Playing: ");
-            usart1_txString(playItem->songName);
-            usart1_txString("\r\n");
+                //bluetooth
+                usart1_txString("Playing: ");
+                usart1_txString(playItem->songName);
+                usart1_txString("\r\n");
 
-            playList_playNextSong();
+                playList_playRandomSong();
+            }
 
+            //it's in single or continuous
+            else
+            {
+                usart2_txString("Play Next Song: ");
+                playItem = playList_getNextSong();
+                usart2_txString(playItem->songName);
+                usart2_txString("\r\n");
+
+                //bluetooth
+                usart1_txString("Playing: ");
+                usart1_txString(playItem->songName);
+                usart1_txString("\r\n");
+
+                playList_playNextSong();
+            }
         }
 
         else if (!strcmp(argv[1], "skip"))
@@ -289,11 +315,14 @@ static void cmdPlaySound(int argc, char** argv)
 
         else if (!strcmp(argv[1], "pause"))
         {
-            usart2_txString("pause the current song\r\n");
+            playItem = playList_getCurrentSong();
+
+            usart2_txString("Pause: ");
+            usart2_txString(playItem->songName);
+            usart2_txString("\r\n");
 
             //bluetooth
             usart1_txString("Pause: ");
-            playItem = playList_getCurrentSong();
             usart1_txString(playItem->songName);
             usart1_txString("\r\n");
 
@@ -303,10 +332,14 @@ static void cmdPlaySound(int argc, char** argv)
 
         else if (!strcmp(argv[1], "resume"))
         {
-            usart2_txString("resume the current song\r\n");
-
-            usart1_txString("Resume: ");
             playItem = playList_getCurrentSong();
+
+            usart2_txString("Resume: ");
+            usart2_txString(playItem->songName);
+            usart2_txString("\r\n");
+
+            //bluetooth
+            usart1_txString("Resume: ");
             usart1_txString(playItem->songName);
             usart1_txString("\r\n");
 
@@ -319,7 +352,8 @@ static void cmdPlaySound(int argc, char** argv)
 
             //use the sdcard print buffer
             length = playList_printSongList(SD_writeBuffer, SD_WRITE_BUFFER_SIZE);
-            usart2_txStringLength(SD_writeBuffer, length);
+            usart2_txStringLength(SD_writeBuffer, length);      //usb
+            usart1_txStringLength(SD_writeBuffer, length);      //bluetooth
 
             //print out the current, next, and previous songs
             playItem = playList_getPreviousSong();
@@ -335,6 +369,11 @@ static void cmdPlaySound(int argc, char** argv)
             playItem = playList_getNextSong();
             usart2_txString("Next Song: ");
             usart2_txString(playItem->songName);
+            usart2_txString("\r\n");
+
+            playItem = playList_getRandomSong();
+            usart2_txString("Random Song: ");
+            usart2_txString(playItem->songName);
             usart2_txString("\r\n\r\n");
 
         }
@@ -344,6 +383,8 @@ static void cmdPlaySound(int argc, char** argv)
             usart2_txString("Play Mode: ");
             if (playList_getPlayMode() == PLAY_MODE_SINGLE)
                 usart2_txString("Single\r\n");
+            else if (playList_getPlayMode() == PLAY_MODE_RANDOM)
+                usart2_txString("Random\r\n");
             else
                 usart2_txString("Continuous\r\n");
         }
@@ -367,6 +408,10 @@ static void cmdPlaySound(int argc, char** argv)
                 usart2_txString(argv[2]);
                 usart2_txString("\r\n");
 
+                usart1_txString("Playing Song: ");
+                usart1_txString(argv[2]);
+                usart1_txString("\r\n");
+
                 wav_playSound(argv[2]);
             }
             else
@@ -374,6 +419,10 @@ static void cmdPlaySound(int argc, char** argv)
                 usart2_txString("Invalid Title (case-sensitive): ");
                 usart2_txString(argv[2]);
                 usart2_txString("\r\n");
+
+                usart1_txString("Invalid Title (case-sensitive): ");
+                usart1_txString(argv[2]);
+                usart1_txString("\r\n");
             }
         }
 
@@ -410,7 +459,7 @@ static void cmdPlaySound(int argc, char** argv)
         }
 
         ///////////////////////////////////////////
-        //set the play mode to single or continuous
+        //set the play mode to single, random, or continuous
         else if (!strcmp(argv[1], "mode"))
         {
             if (!strcmp(argv[2], "single"))
@@ -427,6 +476,11 @@ static void cmdPlaySound(int argc, char** argv)
             {
                 usart2_txString("Set Play Mode: Continuous\r\n");
                 playList_setPlayMode(PLAY_MODE_CONTINUOUS);
+            }
+            else if (!strcmp(argv[2], "random"))
+            {
+                usart2_txString("Set Play Mode: Random\r\n");
+                playList_setPlayMode(PLAY_MODE_RANDOM);
             }
             else
             {

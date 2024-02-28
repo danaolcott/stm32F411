@@ -15,6 +15,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "playlist.h"
 #include "wav.h"
@@ -25,6 +26,7 @@ PlayListItem *gPlayListHead;            //head node - start of the playlist
 PlayListItem *gPlayListCurrentSong;     //pointer to the current song - init at the head
 PlayListItem *gPlayListNextSong;        //pointer the next song
 PlayListItem *gPlayListPreviousSong;    //pointer to the previous song
+PlayListItem *gPlayListRandomSong;      //pointer to a random song on the list
 
 volatile static PlayMode gPlayListMode = PLAY_MODE_SINGLE;        //set to 1 if continuous, 0 for single play
 
@@ -50,6 +52,7 @@ void playList_Init(void)
     gPlayListCurrentSong = gPlayListHead;
     gPlayListNextSong = gPlayListHead;
     gPlayListPreviousSong = gPlayListHead;
+    gPlayListRandomSong = gPlayListHead;
 
 }
 
@@ -376,6 +379,48 @@ void playList_resumeCurrentSong(void)
 }
 
 
+
+///////////////////////////////////////////////////
+PlayListItem* playList_setRandomSong(void)
+{
+    PlayListItem *ptr = gPlayListHead;
+    uint8_t position, i = 0;
+    uint8_t length = playList_getNumSongs();
+
+    //find a random number from 0 to length - 1
+    //and follow down the list to get the random song
+    position = rand() % length;
+
+    for (i = 0 ; i < position ; i++)
+        ptr = ptr->next;
+
+    gPlayListRandomSong = ptr;
+
+    return gPlayListRandomSong;
+}
+
+
+
+PlayListItem* playList_getRandomSong(void)
+{
+    return gPlayListRandomSong;
+}
+////////////////////////////////////////
+//plays the gPlayListRandomSong.
+//these are separate so you can update
+//the display between songs
+void playList_playRandomSong(void)
+{
+    if (wav_getSoundPlayStatus())
+    {
+        wav_stopSound();
+    }
+
+    wav_playSound(gPlayListRandomSong->songName);
+}
+
+
+
 ///////////////////////////////////////
 //Checks to see if the song "name" is
 //on the playlist.  returns 0 if not
@@ -419,6 +464,8 @@ PlayMode playList_getPlayMode(void)
 PlayMode playList_TogglePlayMode(void)
 {
     if (gPlayListMode == PLAY_MODE_SINGLE)
+        gPlayListMode = PLAY_MODE_RANDOM;
+    else if (gPlayListMode == PLAY_MODE_RANDOM)
         gPlayListMode = PLAY_MODE_CONTINUOUS;
     else
         gPlayListMode = PLAY_MODE_SINGLE;
@@ -434,23 +481,38 @@ PlayMode playList_TogglePlayMode(void)
 void playList_displayUpdate(void)
 {
     uint8_t size;
-    uint8_t buffer[32];
+    char buffer[32];
 
     LCD_Clear(0x00);
 
     if (gPlayListMode == PLAY_MODE_SINGLE)
         LCD_DrawStringKern(0, 3, "Single");
-    else
+    else if (gPlayListMode == PLAY_MODE_CONTINUOUS)
         LCD_DrawStringKern(0, 3, "Continuous");
+    else if (gPlayListMode == PLAY_MODE_RANDOM)
+        LCD_DrawStringKern(0, 3, "Random");
 
-    size = snprintf(buffer, 32, "  %s", gPlayListPreviousSong->songName);
-    LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
+    //random mode just jumps around without any
+    //ref to prev and next items.
+    if (gPlayListMode == PLAY_MODE_RANDOM)
+    {
+        LCD_DrawStringKern(2, 3, "Current Song");
 
-    size = snprintf(buffer, 32, ":>> %s", gPlayListCurrentSong->songName);
-    LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
+        size = snprintf(buffer, 32, "%s", gPlayListRandomSong->songName);
+        LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
+    }
 
-    size = snprintf(buffer, 32, "  %s", gPlayListNextSong->songName);
-    LCD_DrawStringKernLength(6, 3, (uint8_t*)buffer, size);
+    else
+    {
+        size = snprintf(buffer, 32, "  %s", gPlayListPreviousSong->songName);
+        LCD_DrawStringKernLength(2, 3, (uint8_t*)buffer, size);
+
+        size = snprintf(buffer, 32, ":>> %s", gPlayListCurrentSong->songName);
+        LCD_DrawStringKernLength(4, 3, (uint8_t*)buffer, size);
+
+        size = snprintf(buffer, 32, "  %s", gPlayListNextSong->songName);
+        LCD_DrawStringKernLength(6, 3, (uint8_t*)buffer, size);
+    }
 }
 
 
