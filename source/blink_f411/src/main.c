@@ -38,6 +38,7 @@ SOFTWARE.
 ///////////////////////////////////////////
 //globals
 volatile uint32_t TimingDelay;
+volatile uint32_t gSystemCounter = 0x00;
 
 char buffer[64] = {0x00};
 int size = 0;

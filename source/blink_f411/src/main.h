@@ -27,6 +27,7 @@
 #include "joystick.h"
 
 extern volatile uint32_t TimingDelay;
+extern volatile uint32_t gSystemCounter;
 void Delay(volatile uint32_t timeTick);
 void TimingDelay_Decrement(void);
 void SystemClockConfig();

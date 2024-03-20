@@ -37,8 +37,6 @@
 #include "sdcard_driver.h"
 #include "timer.h"
 
-volatile uint32_t gSysTickCounter = 0;
-
 
 /** @addtogroup Template_Project
   * @{
@@ -155,7 +153,9 @@ void SysTick_Handler(void)
 	//used for sdcard timeouts.
 	disk_timerproc();
 
-	gSysTickCounter++;
+	gSystemCounter++;
+
+//	gSysTickCounter++;
 }
 
 /******************************************************************************/

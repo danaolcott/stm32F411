@@ -133,9 +133,6 @@ int wav_playSound(char* filename)
     gWavNumBytesInBufferRemaining = WAV_BUFFER_SIZE;    //reset - down counter
 
     gWavSoundIsPlaying = 1;     //see main loop, prevents the LCD from writing
-    //reset the counters for comparing the speed of the interrupt
-    gSysTickCounter = 0;
-    gTimer2Counter = 0;
 
     //open the file....
     res = f_open((FIL*)&wavFile, filename, FA_READ);
@@ -277,19 +274,6 @@ void wav_setDACOutput(uint8_t value)
     //write the values back to ports A and B
     GPIO_Write(GPIOA, portA);
     GPIO_Write(GPIOB, portB);
-
-////////////////////////////////////////////////
-//The following is same as above, but using more
-//register writes.
-//
-//    GPIO_WriteBit(DAC_Bit7_GPIO_Port, DAC_Bit7_Pin, ((value >> 7) & 0x01));
-//    GPIO_WriteBit(DAC_Bit6_GPIO_Port, DAC_Bit6_Pin, ((value >> 6) & 0x01));
-//    GPIO_WriteBit(DAC_Bit5_GPIO_Port, DAC_Bit5_Pin, ((value >> 5) & 0x01));
-//    GPIO_WriteBit(DAC_Bit4_GPIO_Port, DAC_Bit4_Pin, ((value >> 4) & 0x01));
-//    GPIO_WriteBit(DAC_Bit3_GPIO_Port, DAC_Bit3_Pin, ((value >> 3) & 0x01));
-//    GPIO_WriteBit(DAC_Bit2_GPIO_Port, DAC_Bit2_Pin, ((value >> 2) & 0x01));
-//    GPIO_WriteBit(DAC_Bit1_GPIO_Port, DAC_Bit1_Pin, ((value >> 1) & 0x01));
-//    GPIO_WriteBit(DAC_Bit0_GPIO_Port, DAC_Bit0_Pin, ((value >> 0) & 0x01));
 
 }
 

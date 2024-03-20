@@ -17,6 +17,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "main.h"
 #include "playlist.h"
 #include "wav.h"
 #include "lcd_12864_dfrobot.h"
@@ -36,7 +37,7 @@ volatile static PlayMode gPlayListMode = PLAY_MODE_SINGLE;        //set to 1 if 
 //first index
 void playList_Init(void)
 {
-    gPlayListMode = PLAY_MODE_SINGLE;
+    gPlayListMode = PLAY_MODE_RANDOM;
 
     uint8_t i = 0;
     for (i = 0 ; i < PLAYLIST_SIZE ; i++)
@@ -386,6 +387,10 @@ PlayListItem* playList_setRandomSong(void)
     PlayListItem *ptr = gPlayListHead;
     uint8_t position, i = 0;
     uint8_t length = playList_getNumSongs();
+    
+    //set the random seed using the global systemcounter
+    srand(gSystemCounter);
+
 
     //find a random number from 0 to length - 1
     //and follow down the list to get the random song
